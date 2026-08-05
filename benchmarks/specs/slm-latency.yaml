@@ -48,6 +48,9 @@ backends:
     runtime: "definir"            # depende do acelerador detectado no dispositivo
     power_mode: "default"
     command: "python workloads/reference_workload.py --device npu --model $MODEL_PATH --n-predict 128"
+    # Hailo/Coral: FORA DE ESCOPO pra este benchmark (ver docs/PLANO_EXPERIMENTOS.md,
+    # secao "Escopo do backend npu") -- compilador deles nao sustenta decode
+    # autoregressivo. So roda contra Jetson DLA quando esse hardware chegar.
 
 # --- cenarios (ver docs/METODOLOGIA.md secao 5) ---
 scenarios:
