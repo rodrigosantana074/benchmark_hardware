@@ -27,6 +27,7 @@ COLUMNS = [
     # recursos
     "peak_ram_used_mb", "avg_cpu_pct", "peak_cpu_pct", "avg_gpu_pct",
     "max_temp_c", "avg_power_w", "energy_j", "power_source",
+    "avg_gpu_power_w", "energy_gpu_j", "gpu_power_source",
 ]
 
 
@@ -82,6 +83,9 @@ def collect():
             "avg_power_w": res.get("avg_power_w"),
             "energy_j": res.get("energy_j"),
             "power_source": res.get("power_source"),
+            "avg_gpu_power_w": res.get("avg_gpu_power_w"),
+            "energy_gpu_j": res.get("energy_gpu_j"),
+            "gpu_power_source": res.get("gpu_power_source"),
         })
     return rows
 

@@ -41,10 +41,11 @@ throughput bruto.
 
 | Grandeza | Origem possível | Estratégia |
 |---|---|---|
-| Temperatura | `thermal_zone*` no sysfs; utilitário do fornecedor quando o sysfs não expõe | O monitor lê todas as zonas disponíveis e reporta a mais quente, mantendo as demais no detalhe |
-| Potência | Rails INA3221 no sysfs, quando existirem | Integração por amostra para obter energia; sem sensor, o campo fica nulo e a medição depende de instrumento externo |
+| Temperatura | `thermal_zone*` no sysfs; utilitário do fornecedor quando o sysfs não expõe; `nvidia-smi` para GPU discreta | O monitor lê todas as zonas disponíveis (incluindo a GPU NVIDIA, quando presente) e reporta a mais quente, mantendo as demais no detalhe |
+| Potência (board) | Rails INA3221 no sysfs, quando existirem | Integração por amostra para obter `energy_j`; sem sensor, o campo fica nulo e a medição depende de instrumento externo |
+| Potência (GPU discreta) | `nvidia-smi --query-gpu=power.draw` | Campo separado `avg_gpu_power_w` / `energy_gpu_j` — é potência só da GPU, não do sistema inteiro. **Não substitui** `avg_power_w`/`energy_j` nas métricas derivadas (`tok_s_per_w`, `energy_per_tok_mj`): misturar as duas violaria a regra de uma dimensão por comparação |
 | CPU e RAM | `psutil` | Idêntico em todas as plataformas |
-| GPU | Carga exposta em sysfs, quando existir | Nulo quando ausente |
+| GPU | Carga exposta em sysfs (Jetson) ou `nvidia-smi --query-gpu=utilization.gpu` (GPU discreta) | Nulo quando ausente |
 
 Campo ausente é `null`. Zero é medição. Confundir os dois inventa dado.
 

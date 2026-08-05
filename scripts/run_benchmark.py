@@ -70,7 +70,7 @@ def thermal_gate(threshold_c, timeout_s=600):
     m = Monitor(interval=1.0)
     start = time.time()
     while time.time() - start < timeout_s:
-        temp, _ = m.temp.read()
+        temp, _ = m.read_temp()
         if temp is None:
             print("[!] sem leitura de temperatura — gate termico ignorado")
             return None

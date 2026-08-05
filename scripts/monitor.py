@@ -140,6 +140,48 @@ class GPUReader:
         return None
 
 
+class NvidiaSMIReader:
+    """GPU NVIDIA discreta (ex.: mini PC com RTX), via nvidia-smi.
+
+    Uma chamada por amostra devolve temperatura, utilizacao e potencia da GPU
+    juntas — evita tres subprocessos por segundo. Potencia aqui e so da GPU,
+    nunca do sistema inteiro: nao e o mesmo campo que PowerReader (rails
+    INA3221, potencia do board completo na Jetson). Ver docs/METODOLOGIA.md.
+    """
+
+    def __init__(self):
+        self.binary = shutil.which("nvidia-smi")
+        self.available = self.binary is not None
+
+    def read(self):
+        """-> (temp_c, gpu_pct, power_w), None quando indisponivel."""
+        if not self.available:
+            return None, None, None
+        try:
+            out = subprocess.run(
+                [self.binary,
+                 "--query-gpu=temperature.gpu,utilization.gpu,power.draw",
+                 "--format=csv,noheader,nounits"],
+                capture_output=True, text=True, timeout=5,
+            ).stdout.strip()
+        except Exception:
+            return None, None, None
+        if not out:
+            return None, None, None
+
+        def f(v):
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                return None
+
+        parts = [p.strip() for p in out.splitlines()[0].split(",")]
+        temp_c = f(parts[0]) if len(parts) > 0 else None
+        gpu_pct = f(parts[1]) if len(parts) > 1 else None
+        power_w = f(parts[2]) if len(parts) > 2 else None
+        return temp_c, gpu_pct, power_w
+
+
 # --------------------------------------------------------------------------
 # Monitor
 # --------------------------------------------------------------------------
@@ -152,6 +194,7 @@ class Monitor:
         self.temp = TemperatureReader(self.platform)
         self.power = PowerReader(self.platform)
         self.gpu = GPUReader(self.platform)
+        self.nvidia = NvidiaSMIReader()
         self.samples = []
         self._stop = threading.Event()
         self._thread = None
@@ -189,15 +232,37 @@ class Monitor:
         self.stop()
 
     # -- coleta -------------------------------------------------------------
+    def _merge_nvidia_temp(self, t_hottest, t_all, nv_temp):
+        """Dobra a temperatura da GPU NVIDIA nas zonas ja lidas do sysfs."""
+        if nv_temp is None:
+            return t_hottest, t_all
+        t_all = dict(t_all or {})
+        t_all["nvidia_gpu"] = round(nv_temp, 2)
+        t_hottest = max(t_hottest, nv_temp) if t_hottest is not None else nv_temp
+        return t_hottest, t_all
+
+    def read_temp(self):
+        """Zona mais quente entre thermal_zone* e a GPU NVIDIA, quando houver.
+
+        Usado pelo gate termico, fora do loop de amostragem — chamada isolada
+        de nvidia-smi, sem custo extra pra sample().
+        """
+        t_hottest, t_all = self.temp.read()
+        nv_temp, _, _ = self.nvidia.read()
+        return self._merge_nvidia_temp(t_hottest, t_all, nv_temp)
+
     def sample(self):
         t_hottest, t_all = self.temp.read()
+        nv_temp, nv_gpu_pct, nv_power_w = self.nvidia.read()
+        t_hottest, t_all = self._merge_nvidia_temp(t_hottest, t_all, nv_temp)
         s = {
             "t": round(time.time(), 3),
             "cpu_pct": None,
             "ram_used_mb": None,
             "ram_pct": None,
             "proc_rss_mb": None,
-            "gpu_pct": self.gpu.read(),
+            "gpu_pct": self.gpu.read() if self.gpu.available else nv_gpu_pct,
+            "gpu_power_w": nv_power_w,
             "temp_c": t_hottest,
             "temp_zones_c": t_all,
             "power_w": self.power.read(),
@@ -231,13 +296,14 @@ class Monitor:
             vals = [s[key] for s in self.samples if s.get(key) is not None]
             return round(fn(vals), 2) if vals else None
 
-        energy_j = None
-        pw = [(s["t"], s["power_w"]) for s in self.samples if s.get("power_w") is not None]
-        if len(pw) > 1:
-            energy_j = round(
+        def integrate(key):
+            pts = [(s["t"], s[key]) for s in self.samples if s.get(key) is not None]
+            if len(pts) < 2:
+                return None
+            return round(
                 sum(
-                    (pw[i][1] + pw[i - 1][1]) / 2 * (pw[i][0] - pw[i - 1][0])
-                    for i in range(1, len(pw))
+                    (pts[i][1] + pts[i - 1][1]) / 2 * (pts[i][0] - pts[i - 1][0])
+                    for i in range(1, len(pts))
                 ),
                 2,
             )
@@ -256,10 +322,18 @@ class Monitor:
             "temp_start_c": self.samples[0]["temp_c"] if self.samples else None,
             "avg_temp_c": agg("temp_c", lambda v: sum(v) / len(v)),
             "max_temp_c": agg("temp_c", max),
+            # potencia do sistema inteiro (Jetson: rails INA3221). Ausente em
+            # x86 sem wattimetro externo — nao confundir com avg_gpu_power_w.
             "avg_power_w": agg("power_w", lambda v: sum(v) / len(v)),
             "peak_power_w": agg("power_w", max),
-            "energy_j": energy_j,
+            "energy_j": integrate("power_w"),
             "power_source": "internal" if self.power.available else "unavailable",
+            # potencia so da GPU discreta (nvidia-smi). Escopo parcial: nao e
+            # substituto de avg_power_w/energy_j em metricas derivadas.
+            "avg_gpu_power_w": agg("gpu_power_w", lambda v: sum(v) / len(v)),
+            "peak_gpu_power_w": agg("gpu_power_w", max),
+            "energy_gpu_j": integrate("gpu_power_w"),
+            "gpu_power_source": "nvidia-smi" if self.nvidia.available else "unavailable",
         }
 
 
@@ -273,7 +347,8 @@ def main():
 
     m = Monitor(interval=args.interval, out_path=args.out, pid=args.pid)
     print(f"[i] plataforma detectada: {m.platform}")
-    print(f"[i] potencia interna: {'sim' if m.power.available else 'nao'}")
+    print(f"[i] potencia interna (board): {'sim' if m.power.available else 'nao'}")
+    print(f"[i] nvidia-smi (gpu discreta): {'sim' if m.nvidia.available else 'nao'}")
     with m:
         time.sleep(args.duration)
     print(json.dumps(m.summary(), indent=2, ensure_ascii=False))
