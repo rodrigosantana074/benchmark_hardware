@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.gguf
+*.onnx
+*.engine
+models/
+# resultados brutos grandes; commitar meta.json e summary.json sempre
+results/runs/**/*.log

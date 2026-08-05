@@ -1,0 +1,96 @@
+{
+  "run_id": "20260804T200820Z__exemplo-generic-01__slm-latency__gpu__baseline",
+  "status": "ok",
+  "iterations_ok": 3,
+  "iterations_total": 3,
+  "performance": {
+    "wall_time_s": {
+      "mean": 2.1874,
+      "p50": 2.18,
+      "p95": 2.19
+    },
+    "ttft_ms": {
+      "mean": 150.81,
+      "p50": 150.23,
+      "p95": 151.86,
+      "min": 150.16,
+      "max": 152.04,
+      "n": 3
+    },
+    "latency_ms": {
+      "mean": 2151.013,
+      "p50": 2150.43,
+      "p95": 2152.05,
+      "min": 2150.38,
+      "max": 2152.23,
+      "n": 3
+    },
+    "throughput_tok_s": {
+      "mean": 59.503,
+      "p50": 59.52,
+      "p95": 59.52,
+      "min": 59.47,
+      "max": 59.52,
+      "n": 3
+    }
+  },
+  "resources": {
+    "platform": "generic",
+    "n_samples": 7,
+    "interval_s": 1.0,
+    "avg_cpu_pct": 1.43,
+    "peak_cpu_pct": 4.0,
+    "avg_ram_used_mb": 284.0,
+    "peak_ram_used_mb": 284.0,
+    "peak_proc_rss_mb": null,
+    "avg_gpu_pct": null,
+    "peak_gpu_pct": null,
+    "temp_start_c": null,
+    "avg_temp_c": null,
+    "max_temp_c": null,
+    "avg_power_w": null,
+    "peak_power_w": null,
+    "energy_j": null,
+    "power_source": "unavailable"
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "wall_time_s": 2.1927,
+      "returncode": 0,
+      "metrics": {
+        "ttft_ms": 152.04,
+        "latency_ms": 2152.23,
+        "throughput_tok_s": 59.47,
+        "tokens_out": 128
+      }
+    },
+    {
+      "iteration": 2,
+      "wall_time_s": 2.1845,
+      "returncode": 0,
+      "metrics": {
+        "ttft_ms": 150.23,
+        "latency_ms": 2150.43,
+        "throughput_tok_s": 59.52,
+        "tokens_out": 128
+      }
+    },
+    {
+      "iteration": 3,
+      "wall_time_s": 2.1849,
+      "returncode": 0,
+      "metrics": {
+        "ttft_ms": 150.16,
+        "latency_ms": 2150.38,
+        "throughput_tok_s": 59.52,
+        "tokens_out": 128
+      }
+    }
+  ],
+  "derived": {
+    "energy_per_tok_mj": null,
+    "tok_s_per_w": null,
+    "tok_s_per_gb": 214.546
+  }
+}

@@ -1,0 +1,75 @@
+# Spec de benchmark: latencia e throughput de geracao em SLM.
+# Copie este arquivo para criar novos benchmarks. Um arquivo = um benchmark.
+
+id: slm-latency
+name: "Latencia e throughput de geracao — SLM"
+description: >
+  Mede TTFT, latencia por requisicao e tokens/s de um SLM em prompts de
+  tamanho fixo, comparando CPU, GPU e NPU no mesmo dispositivo e entre
+  dispositivos.
+
+# --- identidade do modelo (precisa ser IDENTICA entre plataformas) ---
+model: "LFM2-350M"            # ex.: Liquid AI LFM2 / Qwen2.5-0.5B / Phi-3-mini
+model_version: "definir"     # hash ou tag do checkpoint
+quantization: "Q4_K_M"        # se mudar, vira outro experimento — nao a mesma linha
+seed: 42
+
+workload:
+  prompt_set: "benchmarks/data/prompts_128.jsonl"
+  n_prompts: 20
+  input_tokens: 128
+  output_tokens: 128
+  batch_size: 1
+
+# --- protocolo ---
+repetitions: 5
+warmup: 2
+sample_interval_s: 1.0
+thermal_gate_c: 45
+timeout_s: 1800
+
+# --- como executar em cada arquitetura ---
+# A carga deve imprimir na ultima linha:
+#   METRICS:{"ttft_ms": ..., "latency_ms": ..., "throughput_tok_s": ..., "tokens_out": ...}
+backends:
+  cpu:
+    runtime: "llama.cpp"
+    power_mode: "default"
+    command: "python workloads/reference_workload.py --device cpu --model $MODEL_PATH --n-predict 128"
+    env:
+      OMP_NUM_THREADS: 4
+
+  gpu:
+    runtime: "llama.cpp CUDA"     # na Jetson
+    power_mode: "MAXN"
+    command: "python workloads/reference_workload.py --device cuda --model $MODEL_PATH --n-predict 128"
+
+  npu:
+    runtime: "definir"            # depende do acelerador detectado no dispositivo
+    power_mode: "default"
+    command: "python workloads/reference_workload.py --device npu --model $MODEL_PATH --n-predict 128"
+
+# --- cenarios (ver docs/METODOLOGIA.md secao 5) ---
+scenarios:
+  baseline:
+    description: "Sem restricao, modo de energia maximo"
+
+  low_power:
+    description: "Modo de energia reduzido"
+    power_mode: "15W"
+    env:
+      BENCH_POWER_MODE: "low"
+
+  mem_constrained:
+    description: "RAM limitada via cgroup (v2)"
+    command_suffix: ""
+    env:
+      BENCH_MEM_LIMIT_MB: 1024
+
+  thermal_sustained:
+    description: "Carga continua por 10 min — expoe throttling"
+    command_suffix: "--duration 600"
+
+  concurrent:
+    description: "4 requisicoes simultaneas"
+    command_suffix: "--concurrency 4"

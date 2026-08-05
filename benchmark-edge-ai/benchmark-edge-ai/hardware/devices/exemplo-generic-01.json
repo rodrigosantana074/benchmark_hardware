@@ -1,0 +1,48 @@
+{
+  "device_id": "exemplo-generic-01",
+  "label": "Exemplo",
+  "platform": "generic",
+  "board_model": null,
+  "owner": null,
+  "location": null,
+  "collected_at": "2026-08-04T20:08:11.120696+00:00",
+  "cpu": {
+    "arch": "x86_64",
+    "model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "cores_physical": 1,
+    "cores_logical": 1,
+    "max_freq_mhz": null,
+    "governor": null
+  },
+  "memory": {
+    "total_mb": 3998,
+    "swap_total_mb": 0,
+    "unified_with_gpu": false
+  },
+  "accelerator": {
+    "type": null,
+    "model": null,
+    "details": {}
+  },
+  "thermal": {
+    "zones": [],
+    "cooling": "ativa"
+  },
+  "power": {
+    "internal_sensor": false,
+    "rails": [],
+    "power_source": "external_required",
+    "note": "Sem sensor interno. Medir com wattimetro externo e registrar manualmente."
+  },
+  "storage": {
+    "root_fs": "/dev/vda        252G  8.6G   10G  47% /"
+  },
+  "software": {
+    "os": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo",
+    "kernel": "6.18.5-fc-v18",
+    "python": "3.12.3",
+    "pip_freeze_hint": "gerar com: pip freeze > hardware/devices/<id>.requirements.txt"
+  },
+  "ambient_temp_c": 24.5,
+  "notes": null
+}

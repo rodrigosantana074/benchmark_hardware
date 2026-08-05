@@ -1,0 +1,41 @@
+{
+  "run_id": "20260804T200820Z__exemplo-generic-01__slm-latency__gpu__baseline",
+  "timestamp_utc": "2026-08-04T20:08:28.854036+00:00",
+  "repo_commit": null,
+  "context": {
+    "device_id": "exemplo-generic-01",
+    "device_platform": "generic",
+    "board_model": null,
+    "location": null,
+    "backend": "gpu",
+    "accelerator": null,
+    "accelerator_type": null,
+    "scenario": "baseline",
+    "scenario_description": "Sem restricao, modo de energia maximo",
+    "runtime": "llama.cpp CUDA",
+    "model": "LFM2-350M",
+    "quantization": "Q4_K_M",
+    "workload": {
+      "prompt_set": "benchmarks/data/prompts_128.jsonl",
+      "n_prompts": 20,
+      "input_tokens": 128,
+      "output_tokens": 128,
+      "batch_size": 1
+    },
+    "power_mode": "MAXN",
+    "cooling": "ativa",
+    "ambient_temp_c": 24.5,
+    "temp_start_c": null,
+    "repetitions": 3,
+    "warmup_discarded": 1,
+    "seed": 42,
+    "command": "python workloads/reference_workload.py --device cuda --model reference --n-predict 128",
+    "env_overrides": {}
+  },
+  "methodology_ref": "docs/METODOLOGIA.md",
+  "host": {
+    "python": "3.12.3",
+    "kernel": "6.18.5-fc-v18"
+  },
+  "notes": null
+}

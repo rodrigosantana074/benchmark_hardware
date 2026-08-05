@@ -1,0 +1,5 @@
+psutil>=5.9
+PyYAML>=6.0
+# opcional, para os relatorios
+pandas>=2.0
+matplotlib>=3.7

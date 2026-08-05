@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bancada — comparação de benchmarks</title>
+<style>
+  :root{
+    --paper:#E7EAE7;
+    --surface:#FBFCFB;
+    --ink:#14181B;
+    --ink-2:#4A534F;
+    --ink-3:#7E8783;
+    --rule:#C9CFCA;
+    --rule-soft:#DCE1DC;
+    --cpu:#3D5A80;
+    --gpu:#E07A3E;
+    --npu:#4C956C;
+    --alt1:#7B4B94;
+    --alt2:#2A9D8F;
+    --cold:#2A6F97;
+    --warm:#E0A33E;
+    --hot:#B23B2E;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .label{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+  }
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* ---------- cabecalho ---------- */
+  header{
+    border-bottom:1px solid var(--rule);
+    background:var(--surface);
+    padding:14px 20px;
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    flex-wrap:wrap;
+    position:sticky;top:0;z-index:20;
+  }
+  header h1{
+    font-family:var(--mono);
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    margin:0;
+  }
+  header .sub{color:var(--ink-3);font-size:12px;flex:1}
+  .btn{
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--ink);color:var(--surface);border:1px solid var(--ink);
+    padding:7px 12px;border-radius:2px;cursor:pointer;
+  }
+  .btn:hover{background:#2b3237}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+  .btn.ghost:hover{background:var(--paper)}
+  .btn:focus-visible,select:focus-visible,input:focus-visible,.chip:focus-visible{
+    outline:2px solid var(--cold);outline-offset:2px}
+
+  /* ---------- layout ---------- */
+  .shell{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 52px)}
+  aside{
+    border-right:1px solid var(--rule);
+    background:var(--surface);
+    padding:18px 16px 40px;
+  }
+  main{padding:20px 24px 60px;min-width:0}
+  @media (max-width:820px){
+    .shell{grid-template-columns:1fr}
+    aside{border-right:0;border-bottom:1px solid var(--rule)}
+  }
+
+  .facet{margin-bottom:20px}
+  .facet .label{display:block;margin-bottom:7px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{
+    font-family:var(--mono);font-size:11px;
+    border:1px solid var(--rule);background:transparent;color:var(--ink-2);
+    padding:3px 8px;border-radius:2px;cursor:pointer;
+  }
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+  .chip .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:1px}
+
+  /* ---------- abas ---------- */
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--rule);margin-bottom:18px}
+  .tab{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    background:none;border:0;border-bottom:2px solid transparent;
+    padding:8px 14px 9px;cursor:pointer;color:var(--ink-3);
+  }
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+
+  /* ---------- controles ---------- */
+  .controls{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
+  .control{display:flex;flex-direction:column;gap:5px}
+  select{
+    font-family:var(--mono);font-size:12px;padding:5px 8px;
+    border:1px solid var(--rule);border-radius:2px;background:var(--surface);color:var(--ink);
+  }
+
+  /* ---------- painel ---------- */
+  .panel{
+    background:var(--surface);border:1px solid var(--rule);border-radius:2px;
+    padding:18px;margin-bottom:16px;
+  }
+  .panel h2{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    font-weight:600;margin:0 0 2px;
+  }
+  .panel .hint{color:var(--ink-3);font-size:12px;margin:0 0 14px}
+
+  /* ---------- guarda de comparabilidade (elemento-assinatura) ---------- */
+  .guard{
+    border-left:3px solid var(--warm);
+    background:#FBF6EC;
+    padding:11px 14px;margin-bottom:16px;border-radius:0 2px 2px 0;
+  }
+  .guard.ok{border-left-color:var(--alt2);background:#EEF6F3}
+  .guard .label{color:var(--ink-2);display:block;margin-bottom:4px}
+  .guard p{margin:0;font-size:12.5px;color:var(--ink-2)}
+  .guard code{font-family:var(--mono);font-size:11.5px;background:rgba(0,0,0,.05);padding:1px 4px;border-radius:2px}
+
+  /* ---------- grafico ---------- */
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .grid-line{stroke:var(--rule-soft);stroke-width:1}
+  .axis-line{stroke:var(--rule);stroke-width:1}
+  .tick{font-family:var(--mono);font-size:10px;fill:var(--ink-3)}
+  .bar-val{font-family:var(--mono);font-size:10.5px;fill:var(--ink-2);font-variant-numeric:tabular-nums}
+  .grp-label{font-family:var(--mono);font-size:11px;fill:var(--ink);letter-spacing:.06em}
+  .bar{transition:opacity .12s}
+  .bar:hover{opacity:.75}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .legend span{font-family:var(--mono);font-size:11px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+  .legend i{width:10px;height:10px;border-radius:1px;display:inline-block}
+
+  /* ---------- tabela ---------- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:2px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th{
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    text-align:left;color:var(--ink-3);font-weight:600;
+    padding:9px 10px;border-bottom:1px solid var(--rule);white-space:nowrap;cursor:pointer;
+    background:var(--surface);position:sticky;top:0;
+  }
+  th:hover{color:var(--ink)}
+  td{padding:8px 10px;border-bottom:1px solid var(--rule-soft);white-space:nowrap}
+  tbody tr:hover{background:#F2F4F2}
+  td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+  td .tag{font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:2px;color:#fff}
+  .null{color:var(--ink-3)}
+
+  /* ---------- serie temporal ---------- */
+  .runpicker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .runpicker label{
+    font-family:var(--mono);font-size:11px;border:1px solid var(--rule);
+    padding:4px 8px;border-radius:2px;cursor:pointer;display:flex;align-items:center;gap:6px;
+  }
+  .runpicker input{accent-color:var(--ink)}
+
+  /* ---------- estado vazio ---------- */
+  .empty{
+    border:1px dashed var(--rule);border-radius:2px;background:var(--surface);
+    padding:48px 32px;text-align:center;
+  }
+  .empty h2{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
+  .empty p{color:var(--ink-2);max-width:52ch;margin:0 auto 8px;font-size:13px}
+  .empty .actions{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  body.dragging .empty{border-color:var(--cold);background:#EFF4F8}
+  .drop-overlay{
+    position:fixed;inset:0;background:rgba(42,111,151,.08);border:2px dashed var(--cold);
+    z-index:50;display:none;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--cold);
+  }
+  body.dragging .drop-overlay{display:flex}
+  .err{border-left:3px solid var(--hot);background:#FAEFED;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="drop-overlay">solte os arquivos para carregar</div>
+
+<header>
+  <h1>Bancada</h1>
+  <span class="sub" id="status">nenhum resultado carregado</span>
+  <button class="btn ghost" id="btn-demo">carregar exemplo</button>
+  <button class="btn ghost" id="btn-clear">limpar</button>
+  <button class="btn" id="btn-load">carregar arquivos</button>
+  <input type="file" id="file-input" accept=".json,.ndjson" multiple hidden>
+</header>
+
+<div class="shell">
+  <aside id="facets"></aside>
+  <main>
+    <div id="errors"></div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-view="compare" aria-selected="true">Comparar</button>
+      <button class="tab" role="tab" data-view="table" aria-selected="false">Tabela</button>
+      <button class="tab" role="tab" data-view="series" aria-selected="false">Série temporal</button>
+    </div>
+
+    <div id="view"></div>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+/* ==========================================================================
+   Modelo de dados
+   Um "run" é um experimento: contexto + métricas agregadas + série temporal.
+   O arquivo aceito é o run.json gerado por scripts/run_benchmark.py,
+   ou um bundle (array de runs) gerado por scripts/export_bundle.py.
+   ========================================================================== */
+
+const state = {
+  runs: [],
+  filters: {},      // dim -> Set de valores ativos
+  view: "compare",
+  metric: "throughput_tok_s",
+  groupBy: "backend",
+  colorBy: "device_id",
+  sort: { key: "run_id", dir: 1 },
+  selected: new Set(),
+  seriesField: "temp_c",
+  errors: []
+};
+
+const DIMS = [
+  { key: "device_id",    label: "Dispositivo" },
+  { key: "backend",      label: "Backend" },
+  { key: "accelerator",  label: "Acelerador" },
+  { key: "model",        label: "Modelo" },
+  { key: "quantization", label: "Quantização" },
+  { key: "scenario",     label: "Cenário" },
+  { key: "runtime",      label: "Runtime" },
+  { key: "power_mode",   label: "Modo de energia" }
+];
+
+// Dimensões que, se variarem fora do eixo comparado, invalidam a comparação.
+const CRITICAL_DIMS = ["model", "quantization", "workload_sig", "scenario"];
+
+const METRICS = [
+  { key:"throughput_tok_s", label:"Throughput",        unit:"tok/s", lowerIsBetter:false, get:r=>r.throughput_tok_s },
+  { key:"ttft_ms",          label:"TTFT (p50)",        unit:"ms",    lowerIsBetter:true,  get:r=>r.ttft_ms },
+  { key:"latency_p95_ms",   label:"Latência (p95)",    unit:"ms",    lowerIsBetter:true,  get:r=>r.latency_p95_ms },
+  { key:"peak_ram_mb",      label:"Pico de RAM",       unit:"MB",    lowerIsBetter:true,  get:r=>r.peak_ram_mb },
+  { key:"avg_cpu_pct",      label:"CPU média",         unit:"%",     lowerIsBetter:true,  get:r=>r.avg_cpu_pct },
+  { key:"max_temp_c",       label:"Temperatura máx.",  unit:"°C",    lowerIsBetter:true,  get:r=>r.max_temp_c },
+  { key:"avg_power_w",      label:"Potência média",    unit:"W",     lowerIsBetter:true,  get:r=>r.avg_power_w },
+  { key:"energy_per_tok_mj",label:"Energia por token", unit:"mJ",    lowerIsBetter:true,  get:r=>r.energy_per_tok_mj },
+  { key:"tok_s_per_w",      label:"Throughput por watt", unit:"tok/s/W", lowerIsBetter:false, get:r=>r.tok_s_per_w },
+  { key:"tok_s_per_gb",     label:"Throughput por GB de RAM", unit:"tok/s/GB", lowerIsBetter:false, get:r=>r.tok_s_per_gb }
+];
+
+const SERIES_FIELDS = [
+  { key:"temp_c",       label:"Temperatura", unit:"°C" },
+  { key:"cpu_pct",      label:"CPU",         unit:"%" },
+  { key:"ram_used_mb",  label:"RAM em uso",  unit:"MB" },
+  { key:"gpu_pct",      label:"GPU",         unit:"%" },
+  { key:"power_w",      label:"Potência",    unit:"W" }
+];
+
+const BACKEND_COLOR = { cpu:"var(--cpu)", gpu:"var(--gpu)", npu:"var(--npu)" };
+const PALETTE = ["var(--cpu)","var(--gpu)","var(--npu)","var(--alt1)","var(--alt2)","var(--hot)"];
+
+/* ==========================================================================
+   Normalização
+   ========================================================================== */
+
+function pick(...vals){ for(const v of vals){ if(v!==undefined && v!==null) return v; } return null; }
+function num(v){ return (typeof v === "number" && isFinite(v)) ? v : null; }
+
+function normalize(raw){
+  const c = raw.context || {};
+  const p = raw.performance || {};
+  const s = raw.resources || {};
+  const d = raw.derived || {};
+  const w = c.workload || {};
+
+  const stat = (obj, field) => obj && typeof obj === "object" ? num(obj[field]) : null;
+
+  const r = {
+    run_id: pick(raw.run_id, c.run_id, "run-" + Math.random().toString(36).slice(2,8)),
+    timestamp: pick(raw.timestamp_utc, raw.timestamp, null),
+    status: pick(raw.status, "ok"),
+
+    device_id:    pick(c.device_id, "—"),
+    board_model:  pick(c.board_model, null),
+    platform:     pick(c.device_platform, c.platform, null),
+    backend:      pick(c.backend, "—"),
+    accelerator:  pick(c.accelerator, c.accelerator_model, "—"),
+    runtime:      pick(c.runtime, "—"),
+    model:        pick(c.model, "—"),
+    model_version:pick(c.model_version, null),
+    quantization: pick(c.quantization, "—"),
+    scenario:     pick(c.scenario, "—"),
+    power_mode:   pick(c.power_mode, "—"),
+    cooling:      pick(c.cooling, null),
+    ambient_temp_c: num(c.ambient_temp_c),
+    temp_start_c: num(c.temp_start_c),
+    repetitions:  num(c.repetitions),
+    seed:         pick(c.seed, null),
+
+    input_tokens:  num(w.input_tokens),
+    output_tokens: num(w.output_tokens),
+    batch_size:    num(w.batch_size),
+
+    throughput_tok_s: pick(stat(p.throughput_tok_s,"mean"), num(p.throughput_tok_s)),
+    ttft_ms:          pick(stat(p.ttft_ms,"p50"), stat(p.ttft_ms,"mean"), num(p.ttft_ms)),
+    latency_p95_ms:   pick(stat(p.latency_ms,"p95"), stat(p.latency_ms,"p50"), num(p.latency_ms)),
+    wall_time_s:      pick(stat(p.wall_time_s,"p50"), num(p.wall_time_s)),
+
+    peak_ram_mb:  pick(num(s.peak_ram_used_mb), num(s.peak_proc_rss_mb)),
+    avg_cpu_pct:  num(s.avg_cpu_pct),
+    avg_gpu_pct:  num(s.avg_gpu_pct),
+    max_temp_c:   num(s.max_temp_c),
+    avg_power_w:  num(s.avg_power_w),
+    energy_j:     num(s.energy_j),
+    power_source: pick(s.power_source, "unavailable"),
+
+    samples: Array.isArray(raw.samples) ? raw.samples : []
+  };
+
+  r.workload_sig = [r.input_tokens, r.output_tokens, r.batch_size].join("/");
+
+  // Derivadas: só existem quando os insumos existem. Ausência continua null.
+  r.energy_per_tok_mj = num(d.energy_per_tok_mj) ??
+    (r.energy_j !== null && r.output_tokens ? (r.energy_j / r.output_tokens) * 1000 : null);
+  r.tok_s_per_w = num(d.tok_s_per_w) ??
+    (r.throughput_tok_s !== null && r.avg_power_w ? r.throughput_tok_s / r.avg_power_w : null);
+  r.tok_s_per_gb = num(d.tok_s_per_gb) ??
+    (r.throughput_tok_s !== null && r.peak_ram_mb ? r.throughput_tok_s / (r.peak_ram_mb/1024) : null);
+
+  return r;
+}
+
+/* Aceita: run.json isolado, array de runs, ou par meta.json + summary.json. */
+function ingest(objects){
+  const pending = new Map();   // run_id -> fragmentos a fundir
+  const out = [];
+
+  const push = (o) => {
+    const hasCtx = !!o.context;
+    const hasMetrics = !!(o.performance || o.resources);
+    if (hasCtx && hasMetrics) { out.push(normalize(o)); return; }
+    const id = o.run_id;
+    if (!id) throw new Error("arquivo sem run_id e sem contexto reconhecível");
+    const merged = Object.assign(pending.get(id) || {}, o);
+    pending.set(id, merged);
+  };
+
+  for (const o of objects) {
+    if (Array.isArray(o)) o.forEach(push);
+    else if (o && Array.isArray(o.runs)) o.runs.forEach(push);
+    else push(o);
+  }
+  for (const [, o] of pending) {
+    if (o.context && (o.performance || o.resources)) out.push(normalize(o));
+  }
+  return out;
+}
+
+/* ==========================================================================
+   Filtros
+   ========================================================================== */
+
+function valuesOf(dim){
+  return [...new Set(state.runs.map(r => r[dim]).filter(v => v !== null && v !== "—"))].sort();
+}
+
+function activeRuns(){
+  return state.runs.filter(r =>
+    DIMS.every(d => {
+      const sel = state.filters[d.key];
+      return !sel || sel.size === 0 || sel.has(r[d.key]);
+    })
+  );
+}
+
+function colorFor(dim, value, index){
+  if (dim === "backend" && BACKEND_COLOR[value]) return BACKEND_COLOR[value];
+  return PALETTE[index % PALETTE.length];
+}
+
+/* ==========================================================================
+   Formatação
+   ========================================================================== */
+
+function fmt(v, unit){
+  if (v === null || v === undefined) return "—";
+  const abs = Math.abs(v);
+  let s;
+  if (abs >= 1000) s = v.toFixed(0);
+  else if (abs >= 100) s = v.toFixed(1);
+  else if (abs >= 1) s = v.toFixed(2);
+  else s = v.toFixed(3);
+  return unit ? `${s} ${unit}` : s;
+}
+const esc = (s) => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+
+/* ==========================================================================
+   Render — barra lateral de filtros
+   ========================================================================== */
+
+function renderFacets(){
+  const el = document.getElementById("facets");
+  if (!state.runs.length){ el.innerHTML = ""; return; }
+  el.innerHTML = DIMS.map(d => {
+    const vals = valuesOf(d.key);
+    if (vals.length < 2) return "";
+    const sel = state.filters[d.key];
+    return `<div class="facet">
+      <span class="label">${d.label}</span>
+      <div class="chips">${vals.map((v,i) => {
+        const on = sel && sel.has(v);
+        const dot = d.key === "backend" ? `<span class="dot" style="background:${colorFor(d.key,v,i)}"></span>` : "";
+        return `<button class="chip" role="button" aria-pressed="${!!on}" data-dim="${d.key}" data-val="${esc(v)}">${dot}${esc(v)}</button>`;
+      }).join("")}</div>
+    </div>`;
+  }).join("");
+
+  el.querySelectorAll(".chip").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const { dim, val } = btn.dataset;
+      const set = state.filters[dim] || (state.filters[dim] = new Set());
+      set.has(val) ? set.delete(val) : set.add(val);
+      render();
+    });
+  });
+}
+
+/* ==========================================================================
+   Guarda de comparabilidade
+   Verifica se as linhas exibidas diferem em mais de uma dimensão.
+   ========================================================================== */
+
+function comparabilityReport(runs){
+  const axes = new Set([state.groupBy, state.colorBy]);
+  const problems = [];
+  for (const dim of CRITICAL_DIMS){
+    if (axes.has(dim)) continue;
+    const vals = [...new Set(runs.map(r => r[dim]).filter(v => v !== null))];
+    if (vals.length > 1){
+      const label = (DIMS.find(d => d.key === dim) || {}).label ||
+                    (dim === "workload_sig" ? "Carga (entrada/saída/batch)" : dim);
+      problems.push({ dim, label, vals });
+    }
+  }
+  const noPower = runs.some(r => r.power_source !== "internal");
+  return { problems, noPower };
+}
+
+function renderGuard(runs){
+  const { problems, noPower } = comparabilityReport(runs);
+  let html = "";
+  if (problems.length){
+    html += `<div class="guard">
+      <span class="label">Comparação com ressalva</span>
+      <p>Além do eixo comparado, estes fatores também variam entre os resultados exibidos — a diferença observada não pode ser atribuída só ao eixo:</p>
+      <p style="margin-top:6px">${problems.map(p =>
+        `<strong>${esc(p.label)}</strong>: ${p.vals.map(v => `<code>${esc(v)}</code>`).join(", ")}`
+      ).join(" · ")}</p>
+      <p style="margin-top:6px">Use os filtros à esquerda para isolar uma variável por vez.</p>
+    </div>`;
+  } else if (runs.length > 1){
+    html += `<div class="guard ok">
+      <span class="label">Comparação isolada</span>
+      <p>Os resultados exibidos diferem apenas no eixo comparado. A diferença é atribuível a ele.</p>
+    </div>`;
+  }
+  if (noPower && ["energy_per_tok_mj","tok_s_per_w","avg_power_w"].includes(state.metric)){
+    html += `<div class="guard">
+      <span class="label">Medição de energia incompleta</span>
+      <p>Parte dos dispositivos exibidos não expõe sensor interno de potência. As barras vazias não são zero: são ausência de medição.</p>
+    </div>`;
+  }
+  return html;
+}
+
+/* ==========================================================================
+   Gráfico de barras agrupadas
+   ========================================================================== */
+
+function renderChart(runs){
+  const metric = METRICS.find(m => m.key === state.metric);
+  const groups = [...new Set(runs.map(r => r[state.groupBy]))].sort();
+  const series = [...new Set(runs.map(r => r[state.colorBy]))].sort();
+
+  // valor = média dos runs que caem na célula
+  const cell = (g, s) => {
+    const vals = runs.filter(r => r[state.groupBy] === g && r[state.colorBy] === s)
+                     .map(metric.get).filter(v => v !== null);
+    return vals.length ? { v: vals.reduce((a,b)=>a+b,0)/vals.length, n: vals.length } : null;
+  };
+
+  const data = groups.map(g => ({ g, cells: series.map(s => ({ s, ...(cell(g,s) || {v:null,n:0}) })) }));
+  const allVals = data.flatMap(d => d.cells.map(c => c.v)).filter(v => v !== null);
+  if (!allVals.length){
+    return `<p class="hint">Nenhum resultado com <em>${esc(metric.label)}</em> medido nos filtros atuais.</p>`;
+  }
+  const max = Math.max(...allVals);
+  const best = metric.lowerIsBetter ? Math.min(...allVals) : max;
+
+  const W = 860, padL = 56, padR = 16, padT = 16, rowH = 30, gap = 8, grpGap = 20;
+  const groupH = series.length * rowH + grpGap;
+  const H = padT + data.length * groupH + 30;
+  const chartW = W - padL - padR;
+  const scale = v => (v / max) * (chartW - 60);
+
+  const ticks = [0, .25, .5, .75, 1].map(f => f * max);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Comparação de ${esc(metric.label)}">`;
+  ticks.forEach(t => {
+    const x = padL + scale(t);
+    svg += `<line class="grid-line" x1="${x}" y1="${padT}" x2="${x}" y2="${H-30}"/>`;
+    svg += `<text class="tick" x="${x}" y="${H-14}" text-anchor="middle">${fmt(t,"")}</text>`;
+  });
+  svg += `<text class="tick" x="${padL}" y="${H-2}" text-anchor="start">${esc(metric.unit)}</text>`;
+  svg += `<line class="axis-line" x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-30}"/>`;
+
+  data.forEach((d, gi) => {
+    const y0 = padT + gi * groupH;
+    svg += `<text class="grp-label" x="0" y="${y0 + 12}">${esc(d.g)}</text>`;
+    d.cells.forEach((c, si) => {
+      const y = y0 + si * rowH + 14;
+      const color = colorFor(state.colorBy, c.s, si);
+      if (c.v === null){
+        svg += `<text class="bar-val" x="${padL+6}" y="${y + 11}" fill="var(--ink-3)">sem medição</text>`;
+      } else {
+        const w = Math.max(scale(c.v), 1);
+        const isBest = Math.abs(c.v - best) < 1e-9;
+        svg += `<rect class="bar" x="${padL}" y="${y}" width="${w}" height="${rowH-gap}" fill="${color}"
+                 ${isBest ? 'stroke="var(--ink)" stroke-width="1.5"' : ''}>
+                 <title>${esc(c.s)} · ${esc(d.g)}: ${fmt(c.v, metric.unit)}${c.n>1?` (média de ${c.n} runs)`:""}</title>
+               </rect>`;
+        svg += `<text class="bar-val" x="${padL + w + 7}" y="${y + (rowH-gap)/2 + 4}">${fmt(c.v,"")}${isBest?" ◂":""}</text>`;
+      }
+      svg += `<text class="tick" x="${padL - 6}" y="${y + (rowH-gap)/2 + 4}" text-anchor="end">${esc(c.s)}</text>`;
+    });
+  });
+  svg += `</svg>`;
+
+  const legend = `<div class="legend">${series.map((s,i) =>
+    `<span><i style="background:${colorFor(state.colorBy,s,i)}"></i>${esc(s)}</span>`).join("")}
+    <span style="color:var(--ink-3)">◂ melhor valor (${metric.lowerIsBetter ? "menor" : "maior"} é melhor)</span></div>`;
+
+  return svg + legend;
+}
+
+/* ==========================================================================
+   Vista: Comparar
+   ========================================================================== */
+
+function viewCompare(runs){
+  const opt = (arr, sel, valKey="key", labKey="label") => arr.map(o =>
+    `<option value="${o[valKey]}" ${o[valKey]===sel?"selected":""}>${esc(o[labKey])}</option>`).join("");
+
+  return `
+  <div class="panel">
+    <div class="controls">
+      <div class="control"><span class="label">Métrica</span>
+        <select id="sel-metric">${opt(METRICS, state.metric)}</select></div>
+      <div class="control"><span class="label">Agrupar por</span>
+        <select id="sel-group">${opt(DIMS, state.groupBy)}</select></div>
+      <div class="control"><span class="label">Comparar (cor)</span>
+        <select id="sel-color">${opt(DIMS, state.colorBy)}</select></div>
+      <div class="control" style="margin-left:auto">
+        <span class="label">&nbsp;</span>
+        <button class="btn ghost" id="btn-csv">exportar csv</button>
+      </div>
+    </div>
+  </div>
+
+  ${renderGuard(runs)}
+
+  <div class="panel">
+    <h2>${esc(METRICS.find(m=>m.key===state.metric).label)}</h2>
+    <p class="hint">${runs.length} resultado(s) · agrupado por ${esc(DIMS.find(d=>d.key===state.groupBy).label.toLowerCase())}, comparado por ${esc(DIMS.find(d=>d.key===state.colorBy).label.toLowerCase())}</p>
+    ${renderChart(runs)}
+  </div>`;
+}
+
+/* ==========================================================================
+   Vista: Tabela
+   ========================================================================== */
+
+const TABLE_COLS = [
+  {key:"device_id",label:"Dispositivo",t:"s"},
+  {key:"backend",label:"Backend",t:"tag"},
+  {key:"accelerator",label:"Acelerador",t:"s"},
+  {key:"scenario",label:"Cenário",t:"s"},
+  {key:"model",label:"Modelo",t:"s"},
+  {key:"quantization",label:"Quant.",t:"s"},
+  {key:"workload_sig",label:"in/out/batch",t:"s"},
+  {key:"throughput_tok_s",label:"tok/s",t:"n"},
+  {key:"ttft_ms",label:"TTFT ms",t:"n"},
+  {key:"latency_p95_ms",label:"p95 ms",t:"n"},
+  {key:"peak_ram_mb",label:"RAM pico MB",t:"n"},
+  {key:"avg_cpu_pct",label:"CPU %",t:"n"},
+  {key:"max_temp_c",label:"Temp máx °C",t:"n"},
+  {key:"avg_power_w",label:"Potência W",t:"n"},
+  {key:"energy_per_tok_mj",label:"mJ/token",t:"n"},
+  {key:"repetitions",label:"reps",t:"n"},
+  {key:"temp_start_c",label:"Temp inic. °C",t:"n"},
+  {key:"ambient_temp_c",label:"Ambiente °C",t:"n"},
+  {key:"power_mode",label:"Energia",t:"s"},
+  {key:"cooling",label:"Refrigeração",t:"s"},
+  {key:"runtime",label:"Runtime",t:"s"},
+  {key:"status",label:"Status",t:"s"}
+];
+
+function viewTable(runs){
+  const { key, dir } = state.sort;
+  const sorted = [...runs].sort((a,b) => {
+    const x = a[key], y = b[key];
+    if (x === null) return 1;
+    if (y === null) return -1;
+    return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * dir;
+  });
+
+  const cellHtml = (r, c) => {
+    const v = r[c.key];
+    if (v === null || v === undefined || v === "—") return `<td class="null">—</td>`;
+    if (c.t === "n") return `<td class="n">${fmt(v,"")}</td>`;
+    if (c.t === "tag"){
+      const color = BACKEND_COLOR[v] || "var(--ink-2)";
+      return `<td><span class="tag" style="background:${color}">${esc(v)}</span></td>`;
+    }
+    return `<td>${esc(v)}</td>`;
+  };
+
+  return `<div class="panel" style="padding:0;overflow:hidden">
+    <div class="tablewrap">
+      <table>
+        <thead><tr>${TABLE_COLS.map(c =>
+          `<th data-key="${c.key}">${esc(c.label)}${key===c.key ? (dir>0?" ↑":" ↓") : ""}</th>`).join("")}</tr></thead>
+        <tbody>${sorted.map(r => `<tr>${TABLE_COLS.map(c => cellHtml(r,c)).join("")}</tr>`).join("")}</tbody>
+      </table>
+    </div>
+  </div>
+  <p class="hint" style="color:var(--ink-3);font-size:12px">Cada linha é um experimento com o contexto em que foi medido. Clique no cabeçalho para ordenar.</p>`;
+}
+
+/* ==========================================================================
+   Vista: Série temporal (evidência de throttling)
+   ========================================================================== */
+
+function viewSeries(runs){
+  const withSamples = runs.filter(r => r.samples.length > 1);
+  if (!withSamples.length){
+    return `<div class="panel"><h2>Série temporal</h2>
+      <p class="hint">Nenhum dos resultados filtrados traz a série de amostras. Ela é gravada em <code>samples.ndjson</code> e embutida no <code>run.json</code> quando a execução usa o monitor.</p></div>`;
+  }
+  if (!state.selected.size) withSamples.slice(0,4).forEach(r => state.selected.add(r.run_id));
+
+  const picker = `<div class="runpicker">${withSamples.map(r =>
+    `<label><input type="checkbox" data-run="${esc(r.run_id)}" ${state.selected.has(r.run_id)?"checked":""}>
+     ${esc(r.device_id)} · ${esc(r.backend)} · ${esc(r.scenario)}</label>`).join("")}</div>`;
+
+  const field = SERIES_FIELDS.find(f => f.key === state.seriesField);
+  const chosen = withSamples.filter(r => state.selected.has(r.run_id));
+
+  const lines = chosen.map((r,i) => {
+    const t0 = r.samples[0].t ?? 0;
+    const pts = r.samples
+      .map(s => ({ x:(s.t ?? 0) - t0, y: num(s[field.key]) }))
+      .filter(p => p.y !== null);
+    return { run:r, pts, color: colorFor("_", r.run_id, i) };
+  }).filter(l => l.pts.length > 1);
+
+  if (!lines.length){
+    return `<div class="panel"><h2>Série temporal</h2>${picker}
+      <p class="hint">Os resultados selecionados não têm medição de <em>${esc(field.label.toLowerCase())}</em>.</p>
+      ${seriesControls()}</div>`;
+  }
+
+  const W=860, H=340, padL=52, padR=20, padT=18, padB=34;
+  const maxX = Math.max(...lines.flatMap(l => l.pts.map(p=>p.x)));
+  const maxY = Math.max(...lines.flatMap(l => l.pts.map(p=>p.y)));
+  const minY = Math.min(0, ...lines.flatMap(l => l.pts.map(p=>p.y)));
+  const sx = x => padL + (x/(maxX||1)) * (W-padL-padR);
+  const sy = y => H-padB - ((y-minY)/((maxY-minY)||1)) * (H-padT-padB);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(field.label)} ao longo do tempo">`;
+  for (let i=0;i<=4;i++){
+    const y = minY + (maxY-minY)*i/4, py = sy(y);
+    svg += `<line class="grid-line" x1="${padL}" y1="${py}" x2="${W-padR}" y2="${py}"/>`;
+    svg += `<text class="tick" x="${padL-6}" y="${py+3}" text-anchor="end">${fmt(y,"")}</text>`;
+  }
+  for (let i=0;i<=5;i++){
+    const x = maxX*i/5;
+    svg += `<text class="tick" x="${sx(x)}" y="${H-padB+16}" text-anchor="middle">${Math.round(x)}s</text>`;
+  }
+  svg += `<line class="axis-line" x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}"/>`;
+  svg += `<line class="axis-line" x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}"/>`;
+  svg += `<text class="tick" x="${padL}" y="${padT-6}">${esc(field.unit)}</text>`;
+
+  lines.forEach(l => {
+    const d = l.pts.map((p,i) => `${i?"L":"M"}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join("");
+    svg += `<path d="${d}" fill="none" stroke="${l.color}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  });
+  svg += `</svg>`;
+
+  const legend = `<div class="legend">${lines.map(l =>
+    `<span><i style="background:${l.color}"></i>${esc(l.run.device_id)} · ${esc(l.run.backend)} · ${esc(l.run.scenario)}</span>`).join("")}</div>`;
+
+  return `<div class="panel">
+    <h2>Série temporal</h2>
+    <p class="hint">Amostragem durante a execução. Queda de desempenho acompanhada de subida de temperatura indica throttling.</p>
+    ${seriesControls()}
+    ${picker}
+    ${svg}${legend}
+  </div>`;
+}
+
+function seriesControls(){
+  return `<div class="controls" style="margin-bottom:14px">
+    <div class="control"><span class="label">Grandeza</span>
+      <select id="sel-series">${SERIES_FIELDS.map(f =>
+        `<option value="${f.key}" ${f.key===state.seriesField?"selected":""}>${esc(f.label)}</option>`).join("")}</select>
+    </div></div>`;
+}
+
+/* ==========================================================================
+   Estado vazio
+   ========================================================================== */
+
+function viewEmpty(){
+  return `<div class="empty">
+    <h2>Carregue os resultados</h2>
+    <p>Arraste os arquivos <code>run.json</code> das execuções, ou um bundle com vários resultados. Também funciona com os pares <code>meta.json</code> + <code>summary.json</code> de uma mesma execução.</p>
+    <p>Nada é enviado para servidor nenhum: a leitura acontece no próprio navegador.</p>
+    <div class="actions">
+      <button class="btn" id="btn-load-2">carregar arquivos</button>
+      <button class="btn ghost" id="btn-demo-2">ver com dados de exemplo</button>
+    </div>
+  </div>`;
+}
+
+/* ==========================================================================
+   Render principal
+   ========================================================================== */
+
+function render(){
+  const errEl = document.getElementById("errors");
+  errEl.innerHTML = state.errors.map(e => `<div class="err">${esc(e)}</div>`).join("");
+
+  document.querySelectorAll(".tab").forEach(t =>
+    t.setAttribute("aria-selected", String(t.dataset.view === state.view)));
+
+  const runs = activeRuns();
+  const st = document.getElementById("status");
+  st.textContent = state.runs.length
+    ? `${runs.length} de ${state.runs.length} resultado(s) · ${new Set(state.runs.map(r=>r.device_id)).size} dispositivo(s)`
+    : "nenhum resultado carregado";
+
+  renderFacets();
+  const view = document.getElementById("view");
+
+  if (!state.runs.length){ view.innerHTML = viewEmpty(); bindEmpty(); return; }
+  if (!runs.length){
+    view.innerHTML = `<div class="panel"><h2>Sem resultados</h2>
+      <p class="hint">Os filtros ativos não deixam nenhum resultado visível. Desmarque alguma opção à esquerda.</p></div>`;
+    return;
+  }
+
+  if (state.view === "compare") view.innerHTML = viewCompare(runs);
+  else if (state.view === "table") view.innerHTML = viewTable(runs);
+  else view.innerHTML = viewSeries(runs);
+
+  bindView(runs);
+}
+
+function bindEmpty(){
+  const l = document.getElementById("btn-load-2");
+  const d = document.getElementById("btn-demo-2");
+  if (l) l.onclick = () => document.getElementById("file-input").click();
+  if (d) d.onclick = loadDemo;
+}
+
+function bindView(runs){
+  const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+  on("sel-metric","change", e => { state.metric = e.target.value; render(); });
+  on("sel-group","change",  e => { state.groupBy = e.target.value; render(); });
+  on("sel-color","change",  e => { state.colorBy = e.target.value; render(); });
+  on("sel-series","change", e => { state.seriesField = e.target.value; render(); });
+  on("btn-csv","click", () => exportCsv(runs));
+
+  document.querySelectorAll("th[data-key]").forEach(th => th.addEventListener("click", () => {
+    const k = th.dataset.key;
+    state.sort = { key:k, dir: state.sort.key === k ? -state.sort.dir : 1 };
+    render();
+  }));
+
+  document.querySelectorAll(".runpicker input").forEach(cb => cb.addEventListener("change", () => {
+    cb.checked ? state.selected.add(cb.dataset.run) : state.selected.delete(cb.dataset.run);
+    render();
+  }));
+}
+
+/* ==========================================================================
+   Exportação
+   ========================================================================== */
+
+function exportCsv(runs){
+  const cols = TABLE_COLS.map(c => c.key);
+  const head = ["run_id", ...cols].join(",");
+  const rows = runs.map(r => ["run_id", ...cols].map(k => {
+    const v = r[k];
+    if (v === null || v === undefined) return "";
+    return /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : v;
+  }).join(","));
+  const blob = new Blob([[head, ...rows].join("\n")], { type:"text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "comparativo.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ==========================================================================
+   Entrada de arquivos
+   ========================================================================== */
+
+async function readFiles(fileList){
+  const objs = [];
+  state.errors = [];
+  for (const f of fileList){
+    try {
+      const text = await f.text();
+      if (f.name.endsWith(".ndjson")){
+        text.split("\n").filter(Boolean).forEach(l => objs.push(JSON.parse(l)));
+      } else {
+        objs.push(JSON.parse(text));
+      }
+    } catch (err){
+      state.errors.push(`${f.name}: não foi possível ler (${err.message})`);
+    }
+  }
+  try {
+    const runs = ingest(objs);
+    if (!runs.length && !state.errors.length){
+      state.errors.push("Os arquivos foram lidos, mas não contêm nenhum resultado completo (é preciso contexto + métricas).");
+    }
+    const byId = new Map(state.runs.map(r => [r.run_id, r]));
+    runs.forEach(r => byId.set(r.run_id, r));
+    state.runs = [...byId.values()];
+    state.selected.clear();
+  } catch (err){
+    state.errors.push(err.message);
+  }
+  render();
+}
+
+document.getElementById("btn-load").onclick = () => document.getElementById("file-input").click();
+document.getElementById("file-input").addEventListener("change", e => {
+  readFiles([...e.target.files]);
+  e.target.value = "";
+});
+document.getElementById("btn-clear").onclick = () => {
+  state.runs = []; state.filters = {}; state.errors = []; state.selected.clear(); render();
+};
+document.getElementById("btn-demo").onclick = loadDemo;
+
+["dragenter","dragover"].forEach(ev => document.addEventListener(ev, e => {
+  e.preventDefault(); document.body.classList.add("dragging");
+}));
+["dragleave","drop"].forEach(ev => document.addEventListener(ev, e => {
+  e.preventDefault();
+  if (ev === "drop" || e.relatedTarget === null) document.body.classList.remove("dragging");
+}));
+document.addEventListener("drop", e => { if (e.dataTransfer?.files?.length) readFiles([...e.dataTransfer.files]); });
+
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  state.view = t.dataset.view; render();
+}));
+
+/* ==========================================================================
+   Dados de exemplo — apenas para inspecionar a interface sem medições reais.
+   ========================================================================== */
+
+function demoSamples(n, base, drift, noise){
+  const out = [];
+  for (let i=0;i<n;i++){
+    out.push({
+      t: i,
+      temp_c: +(base + drift*i + (Math.random()-.5)*noise).toFixed(2),
+      cpu_pct: +(40 + Math.random()*25).toFixed(1),
+      ram_used_mb: +(900 + i*1.5 + Math.random()*20).toFixed(1),
+      gpu_pct: null,
+      power_w: null
+    });
+  }
+  return out;
+}
+
+function demoRun(o){
+  return {
+    run_id: o.id,
+    timestamp_utc: "2026-01-01T00:00:00Z",
+    status: "ok",
+    context: {
+      device_id:o.device, board_model:o.board, backend:o.backend, accelerator:o.acc,
+      runtime:o.runtime, model:"slm-350m", quantization:"Q4_K_M", scenario:o.scenario,
+      power_mode:o.power, cooling:"ativa", ambient_temp_c:24.5, temp_start_c:o.t0,
+      repetitions:5, seed:42,
+      workload:{ input_tokens:128, output_tokens:128, batch_size:1 }
+    },
+    performance:{
+      throughput_tok_s:{mean:o.tok}, ttft_ms:{p50:o.ttft},
+      latency_ms:{p95:o.p95}, wall_time_s:{p50:+(128/o.tok).toFixed(2)}
+    },
+    resources:{
+      peak_ram_used_mb:o.ram, avg_cpu_pct:o.cpu, avg_gpu_pct:o.gpu,
+      max_temp_c:o.tmax, avg_power_w:o.watt, energy_j:o.energy,
+      power_source:o.watt ? "internal" : "unavailable"
+    },
+    samples: demoSamples(60, o.t0, (o.tmax-o.t0)/60, 1.2)
+  };
+}
+
+function loadDemo(){
+  const d = [
+    demoRun({id:"d1",device:"jetson-01",board:"Jetson Orin Nano",backend:"cpu",acc:"—",runtime:"llama.cpp",scenario:"baseline",power:"MAXN",tok:9.4,ttft:210,p95:14200,ram:1180,cpu:88,gpu:null,tmax:61.5,t0:38,watt:7.9,energy:1080}),
+    demoRun({id:"d2",device:"jetson-01",board:"Jetson Orin Nano",backend:"gpu",acc:"GPU integrada",runtime:"llama.cpp CUDA",scenario:"baseline",power:"MAXN",tok:26.1,ttft:96,p95:5100,ram:1620,cpu:31,gpu:74,tmax:68.2,t0:38,watt:12.4,energy:610}),
+    demoRun({id:"d3",device:"jetson-01",board:"Jetson Orin Nano",backend:"gpu",acc:"GPU integrada",runtime:"llama.cpp CUDA",scenario:"thermal_sustained",power:"MAXN",tok:19.3,ttft:99,p95:7300,ram:1640,cpu:33,gpu:71,tmax:83.6,t0:41,watt:11.8,energy:790}),
+    demoRun({id:"d4",device:"jetson-01",board:"Jetson Orin Nano",backend:"gpu",acc:"GPU integrada",runtime:"llama.cpp CUDA",scenario:"low_power",power:"15W",tok:17.8,ttft:128,p95:7600,ram:1610,cpu:29,gpu:62,tmax:59.4,t0:37,watt:7.1,energy:512}),
+    demoRun({id:"d5",device:"rpi-01",board:"Raspberry Pi 5",backend:"cpu",acc:"—",runtime:"llama.cpp",scenario:"baseline",power:"performance",tok:6.2,ttft:340,p95:21500,ram:940,cpu:94,gpu:null,tmax:72.1,t0:42,watt:null,energy:null}),
+    demoRun({id:"d6",device:"rpi-01",board:"Raspberry Pi 5",backend:"cpu",acc:"—",runtime:"llama.cpp",scenario:"thermal_sustained",power:"performance",tok:4.7,ttft:352,p95:28900,ram:950,cpu:96,gpu:null,tmax:84.3,t0:44,watt:null,energy:null}),
+    demoRun({id:"d7",device:"rpi-01",board:"Raspberry Pi 5",backend:"npu",acc:"acelerador externo",runtime:"a definir",scenario:"baseline",power:"performance",tok:14.9,ttft:150,p95:8900,ram:780,cpu:41,gpu:null,tmax:63.8,t0:41,watt:null,energy:null})
+  ];
+  state.errors = [];
+  state.runs = ingest(d);
+  state.filters = {};
+  state.selected.clear();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
