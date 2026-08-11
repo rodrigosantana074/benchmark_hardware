@@ -13,7 +13,7 @@ Cada célula preenchida corresponde a uma pasta em `results/runs/`.
 
 | device_id | Placa | Acelerador | Backends aplicáveis |
 |---|---|---|---|
-| `minipc-rtx2000-01` | Mini PC, i5-8500T, 32GB | RTX PRO 2000 16GB | `cpu`, `gpu` |
+| `minipc-rtx3050-01` | Mini PC, i5-8500T, 32GB | RTX 3050 6GB | `cpu`, `gpu` |
 | `rpi5-hailo-01` | Raspberry Pi 5, 16GB | Hailo | `cpu`, `npu`* |
 | `rpi5-coral-01` | Raspberry Pi 5, 16GB | Coral Edge TPU | `cpu`, `npu`* |
 | Jetson | — | — | sem hardware ainda |
@@ -26,11 +26,11 @@ autoregressivo de SLM nas condições atuais. `npu` fica restrito ao benchmark
 
 | Dispositivo | Backend | Cenário | Status |
 |---|---|---|---|
-| `minipc-rtx2000-01` | cpu | baseline | pendente |
-| `minipc-rtx2000-01` | gpu | baseline | pendente |
-| `minipc-rtx2000-01` | gpu | low_power | pendente |
-| `minipc-rtx2000-01` | gpu | thermal_sustained | pendente |
-| `minipc-rtx2000-01` | cpu | mem_constrained | pendente |
+| `minipc-rtx3050-01` | cpu | baseline | pendente |
+| `minipc-rtx3050-01` | gpu | baseline | pendente |
+| `minipc-rtx3050-01` | gpu | low_power | pendente |
+| `minipc-rtx3050-01` | gpu | thermal_sustained | pendente |
+| `minipc-rtx3050-01` | cpu | mem_constrained | pendente |
 | `rpi5-hailo-01` | cpu | baseline | pendente |
 | `rpi5-hailo-01` | cpu | low_power | pendente |
 | `rpi5-hailo-01` | cpu | mem_constrained | pendente |

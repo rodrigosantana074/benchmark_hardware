@@ -25,12 +25,12 @@ custo de RAM, CPU, temperatura e energia.
 pip install -r requirements.txt
 
 # 1. Uma vez por dispositivo — cataloga o hardware
-python scripts/collect_hw_info.py --device-id minipc-rtx2000-01
+python scripts/collect_hw_info.py --device-id minipc-rtx3050-01
 
 # 2. Por experimento
 python scripts/run_benchmark.py \
     --spec benchmarks/specs/slm-latency.yaml \
-    --device-id minipc-rtx2000-01 \
+    --device-id minipc-rtx3050-01 \
     --backend gpu \
     --scenario baseline
 
@@ -81,7 +81,7 @@ só entra por SSH pra disparar. Uma vez por device:
 git clone <remote> && cd benchmark-edge-ai
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python scripts/collect_hw_info.py --device-id minipc-rtx2000-01 \
+python scripts/collect_hw_info.py --device-id minipc-rtx3050-01 \
     --cooling ativa --ambient-temp-c 24
 ```
 
@@ -91,7 +91,7 @@ sozinho passa de 10min por repetição, e a sessão caindo no meio perde a corri
 ```bash
 tmux new -s bench
 python scripts/run_benchmark.py --spec benchmarks/specs/slm-latency.yaml \
-    --device-id minipc-rtx2000-01 --backend gpu --scenario baseline
+    --device-id minipc-rtx3050-01 --backend gpu --scenario baseline
 # Ctrl+B D pra sair sem matar o processo
 ```
 
