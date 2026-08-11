@@ -117,6 +117,9 @@ def main():
     ap.add_argument("--repetitions", type=int, default=None)
     ap.add_argument("--warmup", type=int, default=None)
     ap.add_argument("--ambient-temp-c", type=float, default=None)
+    ap.add_argument("--model-path", default=None,
+                     help="caminho local do arquivo de modelo -- vira $MODEL_PATH "
+                          "no comando. Varia por device, nunca comitado.")
     ap.add_argument("--notes", default=None)
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
@@ -144,6 +147,13 @@ def main():
 
     command = backend_cfg["command"]
     env_extra = {**(backend_cfg.get("env") or {}), **(scenario_cfg.get("env") or {})}
+    if args.model_path:
+        env_extra["MODEL_PATH"] = args.model_path
+    elif "MODEL_PATH" not in os.environ:
+        # sem isso, "$MODEL_PATH" no comando expande pra vazio no shell e
+        # engole o proximo argumento (--n-predict vira o valor de --model) --
+        # falha com codigo 2 sem nenhuma mensagem clara do porque.
+        env_extra["MODEL_PATH"] = "reference"
     if scenario_cfg.get("command_suffix"):
         command = f"{command} {scenario_cfg['command_suffix']}"
 
