@@ -1,0 +1,59 @@
+{
+  "device_id": "minipc-rtx3050-01",
+  "label": "minipc-rtx3050-01",
+  "platform": "generic",
+  "board_model": null,
+  "owner": null,
+  "location": "remoto",
+  "collected_at": "2026-08-11T19:35:38.113957+00:00",
+  "cpu": {
+    "arch": "x86_64",
+    "model": "Intel(R) Core(TM) i5-8500T CPU @ 2.10GHz",
+    "cores_physical": 6,
+    "cores_logical": 6,
+    "max_freq_mhz": 3500.0,
+    "governor": "powersave"
+  },
+  "memory": {
+    "total_mb": 31931,
+    "swap_total_mb": 8192,
+    "unified_with_gpu": false
+  },
+  "accelerator": {
+    "type": "gpu_discrete",
+    "model": "NVIDIA GeForce RTX 3050, 6144 MiB",
+    "details": {}
+  },
+  "thermal": {
+    "zones": [
+      {
+        "zone": "thermal_zone0",
+        "type": "acpitz",
+        "path": "/sys/devices/virtual/thermal/thermal_zone0/temp"
+      },
+      {
+        "zone": "thermal_zone1",
+        "type": "x86_pkg_temp",
+        "path": "/sys/devices/virtual/thermal/thermal_zone1/temp"
+      }
+    ],
+    "cooling": "ativa"
+  },
+  "power": {
+    "internal_sensor": false,
+    "rails": [],
+    "power_source": "external_required",
+    "note": "Sem sensor interno. Medir com wattimetro externo e registrar manualmente."
+  },
+  "storage": {
+    "root_fs": "/dev/nvme0n1p2  915G   83G  787G  10% /"
+  },
+  "software": {
+    "os": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo",
+    "kernel": "6.17.0-35-generic",
+    "python": "3.12.3",
+    "pip_freeze_hint": "gerar com: pip freeze > hardware/devices/<id>.requirements.txt"
+  },
+  "ambient_temp_c": null,
+  "notes": null
+}
