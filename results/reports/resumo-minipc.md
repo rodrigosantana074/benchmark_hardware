@@ -51,7 +51,7 @@ diferença real entre processador e placa de vídeo.
 
 | Medição | Processador (cpu) | Placa de vídeo (gpu) |
 |---|---|---|
-| TTFT (tempo até começar a responder) | 150.3 ms | 150.3 ms |
+| TTFT-Time To First Token (tempo até começar a responder) | 150.3 ms | 150.3 ms |
 | Latency (tempo total até terminar a resposta) | 2150.6 ms (2,15 s) | 2150.6 ms (2,15 s) |
 | Throughput (velocidade de geração, em tokens por segundo) | 59.52 tok/s | 59.52 tok/s |
 | Repetições OK | 5 de 5 | 5 de 5 |
