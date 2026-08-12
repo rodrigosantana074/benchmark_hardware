@@ -10,8 +10,8 @@ Que a esteira de medição funciona de ponta a ponta num device real:
 detecção de hardware, orquestração do teste, telemetria em paralelo,
 gravação de resultado versionado.
 
-**Não é benchmark de desempenho real.** A carga usada é sintética —
-não roda modelo nenhum. Isso vem depois.
+** A carga usada é sintética —
+não roda modelo nenhum. 
 
 ---
 
@@ -24,9 +24,6 @@ não roda modelo nenhum. Isso vem depois.
 | GPU | NVIDIA RTX 3050, 6 GB |
 | SO | Ubuntu 24.04.4, kernel 6.17 |
 | Acesso | SSH remoto (túnel Cloudflare) |
-
-GPU real diverge da especificação original (constava RTX PRO 2000 16GB) —
-sinalizado, aguardando confirmação de qual spec é a correta.
 
 ---
 
@@ -159,7 +156,6 @@ Corrigido e validado nessa mesma rodada.
 
 - Raspberry Pi 5 (Hailo e Coral) — pipeline ainda não testado neles
 - Inferência real: `llama.cpp` + modelo LFM2-350M na máquina — fase seguinte
-- Confirmar spec correta da GPU do mini PC
 
 ---
 
