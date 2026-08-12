@@ -49,27 +49,27 @@ diferença real entre processador e placa de vídeo.
 
 ### Tempo de resposta e velocidade
 
-| O que foi medido | Processador (cpu) | Placa de vídeo (gpu) |
+| Medição | Processador (cpu) | Placa de vídeo (gpu) |
 |---|---|---|
-| Tempo até começar a responder | 150.3 ms | 150.3 ms |
-| Tempo total até terminar a resposta | 2150.6 ms (2,15 s) | 2150.6 ms (2,15 s) |
-| Velocidade de geração de texto | 59.52 "palavras" por segundo | 59.52 "palavras" por segundo |
-| Repetições que deram certo | 5 de 5 | 5 de 5 |
+| TTFT (tempo até começar a responder) | 150.3 ms | 150.3 ms |
+| Latency (tempo total até terminar a resposta) | 2150.6 ms (2,15 s) | 2150.6 ms (2,15 s) |
+| Throughput (velocidade de geração, em tokens por segundo) | 59.52 tok/s | 59.52 tok/s |
+| Repetições OK | 5 de 5 | 5 de 5 |
 
 ### Consumo da máquina durante o teste
 
-| O que foi medido | Processador (cpu) | Placa de vídeo (gpu) |
+| Medição | Processador (cpu) | Placa de vídeo (gpu) |
 |---|---|---|
-| Uso médio de processador | 0.71% | 0.71% |
-| Uso máximo de processador (pico) | 2.3% | 2.4% |
-| Memória RAM usada (média) | ~1948 MB | ~1954 MB |
-| Uso da placa de vídeo (processamento) | 0% | 0% |
-| Energia consumida pela placa de vídeo (média) | 6.58 W | 6.54 W |
-| Energia consumida pela placa de vídeo (pico) | 6.77 W | 6.74 W |
-| Energia total gasta pela placa de vídeo no teste | 68.06 joules | 67.65 joules |
-| Temperatura no início do teste | 45.0 °C | 46.0 °C |
-| Temperatura média durante o teste | 44.8 °C | 44.8 °C |
-| Temperatura máxima atingida | 45.0 °C | 46.0 °C |
+| avg_cpu_pct (uso médio de processador) | 0.71% | 0.71% |
+| peak_cpu_pct (uso máximo de processador, pico) | 2.3% | 2.4% |
+| avg_ram_used_mb (memória RAM usada, média) | ~1948 MB | ~1954 MB |
+| avg_gpu_pct (uso de processamento da GPU) | 0% | 0% |
+| avg_gpu_power_w (potência média da GPU) | 6.58 W | 6.54 W |
+| peak_gpu_power_w (potência máxima da GPU, pico) | 6.77 W | 6.74 W |
+| energy_gpu_j (energia total consumida pela GPU) | 68.06 J | 67.65 J |
+| temp_start_c (temperatura no início do teste) | 45.0 °C | 46.0 °C |
+| avg_temp_c (temperatura média durante o teste) | 44.8 °C | 44.8 °C |
+| max_temp_c (temperatura máxima atingida) | 45.0 °C | 46.0 °C |
 
 Uso de processador e memória ficou baixo porque o teste ainda não processa
 nada pesado de verdade (é a simulação) — número condizente com o esperado
