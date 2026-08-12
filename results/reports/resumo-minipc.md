@@ -6,7 +6,7 @@ Os dados dos campos originais estão em `validacao-minipc.md`, nessa mesma pasta
 
 ## O que foi feito
 
-Testei, num mini PC, se o sistema que criamos pra medir desempenho de inteligência artificial em hardwares diferentes realmente funciona. A ideia do projeto é rodar o mesmo teste em máquinas diferentes — mini PC, Raspberry Pi, e no futuro a Jetson — e comparar quem se sai melhor em cada situação, sem gastar recurso demais nem esquentar demais.
+Testei, no mini PC, se o sistema que criei pra medir desempenho de inteligência artificial em hardwares diferentes realmente funciona. A ideia do projeto é rodar o mesmo teste em máquinas diferentes — mini PC, Raspberry Pi, e no futuro a Jetson — e comparar quem se sai melhor em cada situação, sem gastar recurso demais nem esquentar demais.
 
 Nessa etapa específica, ainda não testamos um modelo de IA de verdade
 gerando texto. Testei a "esteira" que vai medir isso: se o sistema
@@ -72,32 +72,26 @@ diferença real entre processador e placa de vídeo.
 | Temperatura máxima atingida | 45.0 °C | 46.0 °C |
 
 Uso de processador e memória ficou baixo porque o teste ainda não processa
-nada pesado de verdade (é a simulação) — número condizente com o esperado
+nada pesado de verdade, número condizente com o esperado
 pra essa etapa, não com o desempenho final. A GPU aparece com 0% de uso
 processando porque a simulação não manda nenhum cálculo pra ela; a energia
 registrada (6-7 W) é só o consumo da placa parada, "ligada mas ociosa".
 
 ### O que ficou sem medir, e por quê
 
-O consumo de energia da **máquina inteira** (`avg_power_w`/`energy_j` no
-arquivo técnico) ficou em branco nas duas rodadas — não é zero, é ausência
-de dado. Esse mini PC não tem um sensor interno de energia total (só a
+O mini PC não tem um sensor interno de energia total (só a
 Jetson tem esse sensor embutido de fábrica). Pra medir isso aqui, precisaria
-de um medidor externo ligado na tomada. O sistema deixa esse campo vazio de
-propósito em vez de inventar um número — é assim que a regra do projeto
-funciona: dado que não existe fica em branco, nunca vira zero.
+de um medidor externo ligado na tomada. 
 
 ## O que encontramos no caminho
 
-Durante o teste, apareceu um erro real: um dos comandos usados internamente
+Durante o teste, apareceu um erro: um dos comandos usados internamente
 dependia de uma informação (o caminho do arquivo do modelo) que não estava
 definida. Isso passou despercebido nos testes anteriores porque, por uma
 coincidência de como o Windows trata esse tipo de comando, o erro não
-aparecia lá — só apareceu ao rodar no Linux de verdade. Foi corrigido na
+aparecia lá, só apareceu ao rodar no Linux de verdade. Foi corrigido na
 hora e validado na mesma rodada.
 
-Isso reforça por que testar em hardware real (e não só simular) é
-importante: alguns problemas só aparecem no ambiente de verdade.
 
 ## Status atual
 
@@ -105,9 +99,7 @@ importante: alguns problemas só aparecem no ambiente de verdade.
   placa de vídeo)
 - Raspberry Pi (os dois, um com acelerador Hailo e outro com Coral): ainda
   não testados
-- Teste com modelo de IA real: ainda não rodou — é a próxima fase, já com
-  autorização pra prosseguir, rodando de forma isolada (em contêiner) por
-  segurança, já que a máquina é de outra pessoa
+- Teste com modelo de IA real: em progresso, rodando de forma isolada (em contêiner)
 
 ## Próximo passo
 
