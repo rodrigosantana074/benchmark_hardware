@@ -1,19 +1,12 @@
 # Resumo — validação do pipeline no mini PC
 
-Versão em linguagem simples do que foi feito e encontrado. Os dados técnicos
-completos (com todos os campos originais) estão em `validacao-minipc.md`,
-nessa mesma pasta.
+Os dados dos campos originais estão em `validacao-minipc.md`, nessa mesma pasta.
 
 ---
 
 ## O que foi feito
 
-Testamos, num mini PC real (não numa simulação), se o sistema que criamos
-pra medir desempenho de inteligência artificial em hardwares diferentes
-realmente funciona. A ideia do projeto é rodar o mesmo teste em máquinas
-diferentes — mini PC, Raspberry Pi, e no futuro a Jetson — e comparar quem
-se sai melhor em cada situação, sem gastar recurso demais nem esquentar
-demais.
+Testei, num mini PC, se o sistema que criamos pra medir desempenho de inteligência artificial em hardwares diferentes realmente funciona. A ideia do projeto é rodar o mesmo teste em máquinas diferentes — mini PC, Raspberry Pi, e no futuro a Jetson — e comparar quem se sai melhor em cada situação, sem gastar recurso demais nem esquentar demais.
 
 Nessa etapa específica, ainda não testamos um modelo de IA de verdade
 gerando texto. Testamos a "esteira" que vai medir isso: se o sistema
@@ -23,20 +16,10 @@ alguma coisa roda, e se consegue guardar esses dados de forma organizada.
 
 ## A máquina usada
 
-Conseguimos acesso remoto (por SSH, como se fosse controlar outro
-computador pelo terminal) a um mini PC de um colega. As especificações
-reais, conferidas na hora:
-
 - Processador Intel i5-8500T, 6 núcleos
 - 32 GB de memória RAM
 - Placa de vídeo NVIDIA RTX 3050, com 6 GB de memória própria
 - Sistema operacional Ubuntu (Linux)
-
-Um ponto de atenção: a especificação que recebemos originalmente apontava
-uma placa de vídeo diferente e mais forte (RTX PRO 2000, 16 GB). A que
-apareceu de verdade na máquina foi a RTX 3050, de 6 GB. Pode ser que a
-especificação original estivesse errada, ou que seja outro equipamento —
-vale confirmar qual é a informação certa.
 
 ## O que foi confirmado que funciona
 
