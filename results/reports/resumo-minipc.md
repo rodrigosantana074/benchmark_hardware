@@ -83,15 +83,6 @@ O mini PC não tem um sensor interno de energia total (só a
 Jetson tem esse sensor embutido de fábrica). Pra medir isso aqui, precisaria
 de um medidor externo ligado na tomada. 
 
-## impedimento
-
-Durante o teste, apareceu um erro: um dos comandos usados internamente
-dependia de uma informação (o caminho do arquivo do modelo) que não estava
-definida. Isso passou despercebido nos testes anteriores porque, por uma
-coincidência de como o Windows trata esse tipo de comando, o erro não
-aparecia lá, só apareceu ao rodar no Linux de verdade. Foi corrigido na
-hora e validado na mesma rodada.
-
 
 ## Status 
 
