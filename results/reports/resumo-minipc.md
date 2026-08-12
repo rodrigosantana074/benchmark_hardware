@@ -64,18 +64,45 @@ pra provar que a medição funciona, não pra medir desempenho real de IA
 ainda. Quando rodarmos um modelo de verdade, esses números vão refletir a
 diferença real entre processador e placa de vídeo.
 
-O que os números já mostram de real: o uso de processador e memória ficou
-bem baixo (a máquina mal foi exigida, como esperado pra um teste que não
-processa nada pesado ainda), e a temperatura se manteve estável, sem
-esquentar. A placa de vídeo consumiu uma quantidade pequena de energia,
-compatível com estar praticamente ociosa.
+### Tempo de resposta e velocidade
 
-Uma limitação encontrada: esse mini PC não tem um sensor interno de
-consumo de energia total da máquina (só a Jetson tem esse sensor
-embutido). Pra medir quanto a máquina inteira consome de energia, seria
-necessário um medidor externo, ligado na tomada. Isso não é um problema do
-sistema — é uma informação que, sem esse aparelho, o sistema corretamente
-deixa em branco em vez de inventar um número.
+| O que foi medido | Processador (cpu) | Placa de vídeo (gpu) |
+|---|---|---|
+| Tempo até começar a responder | 150.3 ms | 150.3 ms |
+| Tempo total até terminar a resposta | 2150.6 ms (2,15 s) | 2150.6 ms (2,15 s) |
+| Velocidade de geração de texto | 59.52 "palavras" por segundo | 59.52 "palavras" por segundo |
+| Repetições que deram certo | 5 de 5 | 5 de 5 |
+
+### Consumo da máquina durante o teste
+
+| O que foi medido | Processador (cpu) | Placa de vídeo (gpu) |
+|---|---|---|
+| Uso médio de processador | 0.71% | 0.71% |
+| Uso máximo de processador (pico) | 2.3% | 2.4% |
+| Memória RAM usada (média) | ~1948 MB | ~1954 MB |
+| Uso da placa de vídeo (processamento) | 0% | 0% |
+| Energia consumida pela placa de vídeo (média) | 6.58 W | 6.54 W |
+| Energia consumida pela placa de vídeo (pico) | 6.77 W | 6.74 W |
+| Energia total gasta pela placa de vídeo no teste | 68.06 joules | 67.65 joules |
+| Temperatura no início do teste | 45.0 °C | 46.0 °C |
+| Temperatura média durante o teste | 44.8 °C | 44.8 °C |
+| Temperatura máxima atingida | 45.0 °C | 46.0 °C |
+
+Uso de processador e memória ficou baixo porque o teste ainda não processa
+nada pesado de verdade (é a simulação) — número condizente com o esperado
+pra essa etapa, não com o desempenho final. A GPU aparece com 0% de uso
+processando porque a simulação não manda nenhum cálculo pra ela; a energia
+registrada (6-7 W) é só o consumo da placa parada, "ligada mas ociosa".
+
+### O que ficou sem medir, e por quê
+
+O consumo de energia da **máquina inteira** (`avg_power_w`/`energy_j` no
+arquivo técnico) ficou em branco nas duas rodadas — não é zero, é ausência
+de dado. Esse mini PC não tem um sensor interno de energia total (só a
+Jetson tem esse sensor embutido de fábrica). Pra medir isso aqui, precisaria
+de um medidor externo ligado na tomada. O sistema deixa esse campo vazio de
+propósito em vez de inventar um número — é assim que a regra do projeto
+funciona: dado que não existe fica em branco, nunca vira zero.
 
 ## O que encontramos no caminho
 
