@@ -22,7 +22,7 @@ A carga usada é sintética — não roda modelo nenhum.
 | RAM | 32 GB |
 | GPU | NVIDIA RTX 3050, 6 GB |
 | SO | Ubuntu 24.04.4, kernel 6.17 |
-| Acesso | SSH remoto (túnel Cloudflare) |
+| Acesso | SSH remoto (Cloudflare Tunnel) |
 
 ---
 
