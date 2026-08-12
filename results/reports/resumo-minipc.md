@@ -6,7 +6,7 @@ Os dados dos campos originais estão em `validacao-minipc.md`, nessa mesma pasta
 
 ## O que foi feito
 
-Testei, no mini PC, se o sistema que criei pra medir desempenho de inteligência artificial em hardwares diferentes realmente funciona. A ideia do projeto é rodar o mesmo teste em máquinas diferentes — mini PC, Raspberry Pi, e no futuro a Jetson — e comparar quem se sai melhor em cada situação, sem gastar recurso demais nem esquentar demais.
+Testei no mini PC se o sistema que criei pra medir desempenho de inteligência artificial em hardwares diferentes realmente funciona. A ideia do projeto é rodar o mesmo teste em máquinas diferentes — mini PC, Raspberry Pi, e no futuro a Jetson — e comparar quem se sai melhor em cada situação, sem gastar recurso demais nem esquentar demais.
 
 Nessa etapa específica, ainda não testamos um modelo de IA de verdade
 gerando texto. Testei a "esteira" que vai medir isso: se o sistema
