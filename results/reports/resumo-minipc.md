@@ -77,13 +77,13 @@ pra essa etapa, não com o desempenho final. A GPU aparece com 0% de uso
 processando porque a simulação não manda nenhum cálculo pra ela; a energia
 registrada (6-7 W) é só o consumo da placa parada, "ligada mas ociosa".
 
-### O que ficou sem medir, e por quê
+### O que ficou sem medir
 
 O mini PC não tem um sensor interno de energia total (só a
 Jetson tem esse sensor embutido de fábrica). Pra medir isso aqui, precisaria
 de um medidor externo ligado na tomada. 
 
-## O que encontramos no caminho
+## impedimento
 
 Durante o teste, apareceu um erro: um dos comandos usados internamente
 dependia de uma informação (o caminho do arquivo do modelo) que não estava
@@ -93,7 +93,7 @@ aparecia lá, só apareceu ao rodar no Linux de verdade. Foi corrigido na
 hora e validado na mesma rodada.
 
 
-## Status atual
+## Status 
 
 - Mini PC: pipeline validado, funcionando nos dois modos (processador e
   placa de vídeo)
@@ -101,8 +101,4 @@ hora e validado na mesma rodada.
   não testados
 - Teste com modelo de IA real: em progresso, rodando de forma isolada (em contêiner)
 
-## Próximo passo
 
-Repetir essa mesma validação nos dois Raspberry Pi, e então avançar pra
-rodar um modelo de IA de verdade (Liquid AI) dentro de um contêiner no
-mini PC.
