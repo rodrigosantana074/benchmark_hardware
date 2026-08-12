@@ -37,7 +37,7 @@ alguma coisa roda, e se consegue guardar esses dados de forma organizada.
 - Testei rodando tanto pelo processador quanto pela placa de vídeo, e os
   dois caminhos funcionaram sem falha nas 5 repetições
 
-## Sobre os números desta rodada
+## Sobre os resultados
 
 Os números de tempo de resposta e velocidade saíram praticamente iguais
 entre processador e placa de vídeo. Isso **não quer dizer que os dois têm o
