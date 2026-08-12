@@ -1,0 +1,122 @@
+{
+  "run_id": "20260812T000804Z__minipc-rtx3050-01__slm-latency__cpu__baseline",
+  "status": "ok",
+  "iterations_ok": 5,
+  "iterations_total": 5,
+  "performance": {
+    "wall_time_s": {
+      "mean": 2.1809,
+      "p50": 2.18,
+      "p95": 2.18
+    },
+    "ttft_ms": {
+      "mean": 150.292,
+      "p50": 150.32,
+      "p95": 150.32,
+      "min": 150.19,
+      "max": 150.32,
+      "n": 5
+    },
+    "latency_ms": {
+      "mean": 2150.572,
+      "p50": 2150.62,
+      "p95": 2150.65,
+      "min": 2150.43,
+      "max": 2150.65,
+      "n": 5
+    },
+    "throughput_tok_s": {
+      "mean": 59.52,
+      "p50": 59.52,
+      "p95": 59.52,
+      "min": 59.52,
+      "max": 59.52,
+      "n": 5
+    }
+  },
+  "resources": {
+    "platform": "generic",
+    "n_samples": 11,
+    "interval_s": 1.0,
+    "avg_cpu_pct": 0.71,
+    "peak_cpu_pct": 2.3,
+    "avg_ram_used_mb": 1947.88,
+    "peak_ram_used_mb": 1952.8,
+    "peak_proc_rss_mb": null,
+    "avg_gpu_pct": 0.0,
+    "peak_gpu_pct": 0.0,
+    "temp_start_c": 45.0,
+    "avg_temp_c": 44.82,
+    "max_temp_c": 45.0,
+    "avg_power_w": null,
+    "peak_power_w": null,
+    "energy_j": null,
+    "power_source": "unavailable",
+    "avg_gpu_power_w": 6.58,
+    "peak_gpu_power_w": 6.77,
+    "energy_gpu_j": 68.06,
+    "gpu_power_source": "nvidia-smi"
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "wall_time_s": 2.1814,
+      "returncode": 0,
+      "metrics": {
+        "ttft_ms": 150.32,
+        "latency_ms": 2150.62,
+        "throughput_tok_s": 59.52,
+        "tokens_out": 128
+      }
+    },
+    {
+      "iteration": 2,
+      "wall_time_s": 2.1807,
+      "returncode": 0,
+      "metrics": {
+        "ttft_ms": 150.32,
+        "latency_ms": 2150.65,
+        "throughput_tok_s": 59.52,
+        "tokens_out": 128
+      }
+    },
+    {
+      "iteration": 3,
+      "wall_time_s": 2.1806,
+      "returncode": 0,
+      "metrics": {
+        "ttft_ms": 150.19,
+        "latency_ms": 2150.52,
+        "throughput_tok_s": 59.52,
+        "tokens_out": 128
+      }
+    },
+    {
+      "iteration": 4,
+      "wall_time_s": 2.1805,
+      "returncode": 0,
+      "metrics": {
+        "ttft_ms": 150.32,
+        "latency_ms": 2150.43,
+        "throughput_tok_s": 59.52,
+        "tokens_out": 128
+      }
+    },
+    {
+      "iteration": 5,
+      "wall_time_s": 2.1812,
+      "returncode": 0,
+      "metrics": {
+        "ttft_ms": 150.31,
+        "latency_ms": 2150.64,
+        "throughput_tok_s": 59.52,
+        "tokens_out": 128
+      }
+    }
+  ],
+  "derived": {
+    "energy_per_tok_mj": null,
+    "tok_s_per_w": null,
+    "tok_s_per_gb": 31.211
+  }
+}
