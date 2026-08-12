@@ -10,8 +10,7 @@ Que a esteira de medição funciona de ponta a ponta num device real:
 detecção de hardware, orquestração do teste, telemetria em paralelo,
 gravação de resultado versionado.
 
-** A carga usada é sintética —
-não roda modelo nenhum. 
+A carga usada é sintética — não roda modelo nenhum.
 
 ---
 
