@@ -9,7 +9,7 @@ Os dados dos campos originais estão em `validacao-minipc.md`, nessa mesma pasta
 Testei, num mini PC, se o sistema que criamos pra medir desempenho de inteligência artificial em hardwares diferentes realmente funciona. A ideia do projeto é rodar o mesmo teste em máquinas diferentes — mini PC, Raspberry Pi, e no futuro a Jetson — e comparar quem se sai melhor em cada situação, sem gastar recurso demais nem esquentar demais.
 
 Nessa etapa específica, ainda não testamos um modelo de IA de verdade
-gerando texto. Testamos a "esteira" que vai medir isso: se o sistema
+gerando texto. Testei a "esteira" que vai medir isso: se o sistema
 consegue identificar o hardware sozinho, se consegue medir o que acontece
 com a máquina (processador, memória, temperatura, placa de vídeo) enquanto
 alguma coisa roda, e se consegue guardar esses dados de forma organizada.
@@ -34,7 +34,7 @@ alguma coisa roda, e se consegue guardar esses dados de forma organizada.
   processador, memória, temperatura e o quanto a placa de vídeo está
   consumindo de energia — tudo isso é registrado a cada segundo,
   separadamente do teste em si
-- Testamos rodando tanto pelo processador quanto pela placa de vídeo, e os
+- Testei rodando tanto pelo processador quanto pela placa de vídeo, e os
   dois caminhos funcionaram sem falha nas 5 repetições
 
 ## Sobre os números desta rodada
