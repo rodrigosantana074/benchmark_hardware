@@ -112,13 +112,43 @@ uma pergunta que nunca chegava (travava, sem erro nenhum aparecer). Troquei
 pra rodar ele como um servidor — daí eu mando a pergunta por HTTP e recebo a
 resposta com os tempos exatos, sem depender de ler texto solto da tela.
 
+---
+
+## E agora testei IA real no processador também
+
+Mesmo modelo, mesmo teste, só que dessa vez sem usar a placa de vídeo —
+tudo processado no processador comum. Também 5 de 5 repetições certas.
+
+| Medição | Placa de vídeo (gpu) | Processador (cpu) |
+|---|---|---|
+| Throughput (tokens por segundo, média) | 88.27 tok/s | **99.10 tok/s** |
+| Throughput (variação entre as 5 repetições) | 88.24 a 88.28 (bem estável) | 75.94 a 105.93 (bem instável) |
+| TTFT (tempo até começar a responder) | 21.5 ms | 15.3 ms |
+| avg_cpu_pct (uso do processador) | 15% | **94.6%** |
+| avg_gpu_pct (uso da placa de vídeo) | 93.4% | 0% |
+| avg_ram_used_mb (RAM usada) | ~2591 MB | ~3900 MB |
+| Temperatura média / máxima | 56.3 °C / 57 °C | 61.7 °C / 65 °C |
+
+**Achado que não esperava:** pra esse modelo pequeno, o processador saiu
+com velocidade média até maior que a placa de vídeo — mas bem menos
+consistente (uma das 5 repetições foi bem mais lenta que as outras,
+provavelmente por causa do calor acumulado ou de outros programas rodando
+na máquina ao mesmo tempo). A placa de vídeo foi mais lenta na média, só
+que muito mais previsível — as 5 repetições saíram quase idênticas.
+
+Isso não significa "processador é melhor que placa de vídeo" — significa
+que, pra esse modelo pequeno e esse teste curto, cada um leva vantagem em
+um critério diferente (velocidade de pico vs. previsibilidade), que é
+exatamente o tipo de resposta que esse projeto existe pra dar. Com modelo
+maior ou teste mais longo, isso tende a inverter a favor da GPU.
+
 ## Status
 
-- Mini PC: pipeline validado nos dois modos (processador e placa de vídeo)
-  com carga sintética, e agora também com IA real na placa de vídeo
+- Mini PC: pipeline validado nos dois modos (processador e placa de vídeo),
+  com carga sintética e com IA real, nos dois backends
 - Raspberry Pi (os dois, um com acelerador Hailo e outro com Coral): ainda
   não testados
-- Falta: IA real também no processador (só testei na GPU até agora), e um
-  jeito de medir a energia da máquina inteira (não só da placa de vídeo)
+- Falta: medir a energia da máquina inteira (só a placa de vídeo é medida
+  hoje) e testar outros cenários (carga sustentada, restrição de memória)
 
 

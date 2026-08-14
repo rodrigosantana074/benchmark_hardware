@@ -208,6 +208,93 @@ simulação.
 
 ---
 
+## Inferência real — LFM2-350M, backend `cpu`
+
+Mesmo modelo, mesmo cenário, agora sem GPU — `llama.cpp` (imagem
+`ghcr.io/ggml-org/llama.cpp:server`, sem CUDA) em container. 5/5 repetições
+OK. `run_id: 20260814T194605Z__minipc-rtx3050-01__slm-latency__cpu__baseline`.
+
+### Desempenho
+
+| Métrica | mean | p50 | p95 | min | max | n |
+|---|---|---|---|---|---|---|
+| wall_time_s | 1.4359 | 1.34 | 1.72 | — | — | — |
+| ttft_ms | 15.294 | 12.94 | 20.27 | 12.78 | 21.16 | 5 |
+| latency_ms | 1318.62 | 1219.23 | 1605.2 | 1213.11 | 1693.62 | 5 |
+| throughput_tok_s | 99.096 | 105.27 | 105.9 | 75.94 | 105.93 | 5 |
+
+Repare na variação: p95/max bem acima da mediana, e a iteração 5 destoa das
+outras (ver tabela de iterações). Diferente da GPU, que saiu com desvio
+mínimo entre repetições.
+
+### Recursos
+
+| Campo | Valor |
+|---|---|
+| n_samples / interval_s | 7 / 1.0 s |
+| avg_cpu_pct / peak_cpu_pct | **94.59% / 100.0%** |
+| avg_ram_used_mb / peak_ram_used_mb | 3899.89 MB / 3920.4 MB |
+| avg_gpu_pct / peak_gpu_pct | 0.0% / 0.0% |
+| temp_start_c / avg_temp_c / max_temp_c | 60.0 °C / 61.71 °C / 65.0 °C |
+| avg_power_w / peak_power_w / energy_j | null / null / null (sem sensor de board no x86) |
+| avg_gpu_power_w / peak_gpu_power_w | 6.5 W / 6.77 W (GPU ociosa, não usada) |
+| energy_gpu_j | 40.7 J |
+| gpu_power_source | nvidia-smi |
+
+### Métricas derivadas
+
+| Métrica | Valor |
+|---|---|
+| energy_per_tok_mj | null |
+| tok_s_per_w | null |
+| tok_s_per_gb | 25.884 |
+
+### Iterações individuais
+
+| # | wall_time_s | ttft_ms | latency_ms | throughput_tok_s | tokens_out |
+|---|---|---|---|---|---|
+| 1 | 1.3348 | 16.73 | 1215.61 | 105.93 | 128 |
+| 2 | 1.3300 | 12.78 | 1213.11 | 105.80 | 128 |
+| 3 | 1.3371 | 12.86 | 1219.23 | 105.27 | 128 |
+| 4 | 1.3686 | 12.94 | 1251.53 | 102.54 | 128 |
+| 5 | 1.8091 | 21.16 | 1693.62 | 75.94 | 128 |
+
+A iteração 5 tem latência ~40% maior e throughput ~28% menor que as outras
+quatro — a temperatura já tinha subido pro pico (65°C) nesse ponto, e a
+máquina tem uma sessão gráfica remota ativa competindo por CPU. Não dá pra
+afirmar qual das duas causas pesou mais sem repetir com mais amostras.
+
+---
+
+## Comparação direta — cpu vs. gpu, inferência real
+
+| Métrica | cpu | gpu |
+|---|---|---|
+| throughput_tok_s (mean) | **99.10** | 88.27 |
+| throughput_tok_s (variação min–max) | 75.94 – 105.93 (instável) | 88.24 – 88.28 (estável) |
+| ttft_ms (mean) | 15.29 | 21.46 |
+| latency_ms (mean) | 1318.62 | 1471.67 |
+| avg_cpu_pct | 94.59% | 14.96% |
+| avg_gpu_pct | 0.0% | 93.38% |
+| avg_ram_used_mb | 3899.89 MB | 2591.07 MB |
+| avg_temp_c / max_temp_c | 61.71 °C / 65.0 °C | 56.25 °C / 57.0 °C |
+| avg_gpu_power_w | 6.5 W (ociosa) | 25.61 W (em uso) |
+
+Achado real, não esperado de antemão: pra esse modelo pequeno (350M
+parâmetros), o `cpu` saiu com throughput médio **mais alto** que o `gpu`
+nessa máquina — mas com quase o triplo de variação entre repetições, mais
+uso de RAM, e mais aquecimento. A GPU entregou número mais baixo só na
+média, só que extremamente consistente entre as 5 repetições. Qual
+"vence" depende do que importa mais pro caso de uso: throughput de pico ou
+previsibilidade — exatamente o tipo de resposta que esse projeto existe
+pra dar, em vez de eleger um vencedor absoluto.
+
+Isso é só uma repetição de 5 amostras; não é conclusivo, é sinal. Cenários
+com contexto maior, modelo maior, ou carga sustentada tendem a inverter
+isso — GPU historicamente escala melhor conforme o tamanho do modelo cresce.
+
+---
+
 ## Encontrado no caminho
 
 - Bug real: variável `$MODEL_PATH` não definida quebrava o comando no shell
@@ -224,9 +311,12 @@ simulação.
 ## Falta pra fechar
 
 - Raspberry Pi 5 (Hailo e Coral) — pipeline ainda não testado neles
-- Backend `cpu` com inferência real (só o `gpu` foi testado até agora)
 - Métrica de energia do sistema inteiro — só a GPU é medida; falta sensor
   externo ou wattímetro pra fechar `energy_per_tok_mj`/`tok_s_per_w`
+- Cenários além de `baseline` (mem_constrained, thermal_sustained,
+  concurrent) — ainda não exercitados com inferência real
+- A variação alta no `cpu` (iteração 5) merece mais amostras antes de
+  virar conclusão
 
 ---
 
