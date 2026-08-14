@@ -1,6 +1,6 @@
 # Validação do pipeline — Mini PC
 
-Status em 2026-08-12. Device: `minipc-rtx3050-01`.
+Status em 2026-08-14. Device: `minipc-rtx3050-01`.
 
 ---
 
@@ -143,21 +143,95 @@ Todas as 10 iterações (5+5) retornaram código 0 — nenhuma falha.
 
 ---
 
+## Inferência real — LFM2-350M, backend `gpu`
+
+Primeiro benchmark de IA de verdade do projeto, não mais carga sintética.
+`llama.cpp` (servidor, imagem `ghcr.io/ggml-org/llama.cpp:server-cuda`)
+rodando em container Docker isolado, modelo `LiquidAI/LFM2-350M-GGUF:Q4_K_M`
+baixado direto do Hugging Face. Cenário `baseline`, 5/5 repetições OK.
+`run_id: 20260814T191545Z__minipc-rtx3050-01__slm-latency__gpu__baseline`.
+
+### Desempenho
+
+| Métrica | mean | p50 | p95 | min | max | n |
+|---|---|---|---|---|---|---|
+| wall_time_s | 1.5908 | 1.59 | 1.59 | — | — | — |
+| ttft_ms | 21.46 | 21.46 | 21.48 | 21.44 | 21.48 | 5 |
+| latency_ms | 1471.67 | 1471.64 | 1472.04 | 1471.41 | 1472.12 | 5 |
+| throughput_tok_s | 88.266 | 88.27 | 88.28 | 88.24 | 88.28 | 5 |
+
+### Recursos
+
+| Campo | Valor |
+|---|---|
+| n_samples / interval_s | 8 / 1.0 s |
+| avg_cpu_pct / peak_cpu_pct | 14.96% / 17.3% |
+| avg_ram_used_mb / peak_ram_used_mb | 2591.07 MB / 2619.2 MB |
+| avg_gpu_pct / peak_gpu_pct | **93.38% / 98.0%** |
+| temp_start_c / avg_temp_c / max_temp_c | 53.0 °C / 56.25 °C / 57.0 °C |
+| avg_power_w / peak_power_w / energy_j | null / null / null (sem sensor de board no x86) |
+| avg_gpu_power_w / peak_gpu_power_w | 25.61 W / 26.23 W |
+| energy_gpu_j | 183.65 J |
+| gpu_power_source | nvidia-smi |
+
+### Métricas derivadas
+
+| Métrica | Valor |
+|---|---|
+| energy_per_tok_mj | null (depende de energy_j, que é null) |
+| tok_s_per_w | null (depende de avg_power_w, que é null) |
+| tok_s_per_gb | 34.508 |
+
+### Iterações individuais
+
+| # | wall_time_s | ttft_ms | latency_ms | throughput_tok_s | tokens_out |
+|---|---|---|---|---|---|
+| 1 | 1.5919 | 21.45 | 1472.12 | 88.24 | 128 |
+| 2 | 1.5902 | 21.48 | 1471.74 | 88.26 | 128 |
+| 3 | 1.5905 | 21.47 | 1471.64 | 88.27 | 128 |
+| 4 | 1.5904 | 21.46 | 1471.41 | 88.28 | 128 |
+| 5 | 1.5909 | 21.44 | 1471.44 | 88.28 | 128 |
+
+### Comparado com a carga sintética (mesmo device, mesmo backend)
+
+| Sinal | Sintética (dia anterior) | Inferência real |
+|---|---|---|
+| avg_gpu_pct | 0.0% | 93.38% |
+| avg_gpu_power_w | 6.54 W | 25.61 W |
+| avg_temp_c | 44.82 °C | 56.25 °C |
+| throughput_tok_s | 59.52 (número de mentira) | 88.266 (real) |
+
+A diferença de uso de GPU, potência e temperatura entre as duas rodadas é o
+sinal de que dessa vez o hardware foi exigido de verdade — é o que faltava
+pra dizer que a esteira de medição também captura carga real, não só a
+simulação.
+
+---
+
 ## Encontrado no caminho
 
-Bug real: variável `$MODEL_PATH` não definida quebrava o comando no shell
-do Linux (funcionava por acidente no ambiente de teste no Windows).
-Corrigido e validado nessa mesma rodada.
+- Bug real: variável `$MODEL_PATH` não definida quebrava o comando no shell
+  do Linux (funcionava por acidente no ambiente de teste no Windows).
+  Corrigido e validado antes da primeira rodada.
+- O `llama.cpp` em modo interativo/chat entra num loop esperando entrada que
+  nunca chega quando rodado sem terminal de verdade — resolvido usando o
+  servidor HTTP (`llama-server`) em vez do modo linha de comando, com um
+  script tradutor (`workloads/llama_docker_workload.py`) que lê os tempos
+  exatos do JSON de resposta do servidor.
 
 ---
 
 ## Falta pra fechar
 
 - Raspberry Pi 5 (Hailo e Coral) — pipeline ainda não testado neles
-- Inferência real: `llama.cpp` + modelo LFM2-350M na máquina — fase seguinte
+- Backend `cpu` com inferência real (só o `gpu` foi testado até agora)
+- Métrica de energia do sistema inteiro — só a GPU é medida; falta sensor
+  externo ou wattímetro pra fechar `energy_per_tok_mj`/`tok_s_per_w`
 
 ---
 
 ## Próximo passo
 
-Abrir acesso SSH aos dois Raspberry Pi e repetir essa mesma validação.
+Abrir acesso SSH aos dois Raspberry Pi e repetir essa mesma validação —
+primeiro com a carga sintética (provar o pipeline), depois com inferência
+real.

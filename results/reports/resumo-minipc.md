@@ -81,15 +81,44 @@ registrada (6-7 W) é só o consumo da placa parada, "ligada mas ociosa".
 
 O mini PC não tem um sensor interno de energia total (só a
 Jetson tem esse sensor embutido de fábrica). Pra medir isso aqui, precisaria
-de um medidor externo ligado na tomada. 
+de um medidor externo ligado na tomada.
 
+---
 
-## Status 
+## Agora com IA de verdade — modelo LFM2 rodando na GPU
 
-- Mini PC: pipeline validado, funcionando nos dois modos (processador e
-  placa de vídeo)
+Depois da validação com carga sintética, rodei o benchmark oficial com o
+modelo real (LFM2-350M, da Liquid AI), isolado num contêiner Docker, na
+placa de vídeo. 5 de 5 repetições certas.
+
+| Medição | Sintético (dia anterior) | IA real |
+|---|---|---|
+| TTFT (tempo até começar a responder) | 150.3 ms | 21.5 ms |
+| Latency (tempo total da resposta) | 2150.6 ms | 1471.7 ms |
+| Throughput (tokens por segundo) | 59.52 tok/s (número de mentira) | 88.27 tok/s (real) |
+| avg_gpu_pct (uso da placa de vídeo) | 0% | **93.4%** |
+| avg_gpu_power_w (potência média da GPU) | 6.54 W | **25.6 W** |
+| avg_temp_c (temperatura média) | 44.8 °C | 56.3 °C |
+| avg_ram_used_mb (RAM usada) | ~1954 MB | ~2591 MB |
+
+A diferença entre as duas colunas é o que prova que dessa vez a GPU
+trabalhou de verdade: uso de processamento foi de 0% pra 93%, o consumo de
+energia quase quadruplicou, e a temperatura subiu de forma real. Antes a
+placa só ficava ligada e ociosa; agora ela processou o modelo.
+
+Pelo caminho, tive que resolver um problema: rodando o `llama.cpp` direto
+pela linha de comando, ele entrava num modo de conversa e ficava esperando
+uma pergunta que nunca chegava (travava, sem erro nenhum aparecer). Troquei
+pra rodar ele como um servidor — daí eu mando a pergunta por HTTP e recebo a
+resposta com os tempos exatos, sem depender de ler texto solto da tela.
+
+## Status
+
+- Mini PC: pipeline validado nos dois modos (processador e placa de vídeo)
+  com carga sintética, e agora também com IA real na placa de vídeo
 - Raspberry Pi (os dois, um com acelerador Hailo e outro com Coral): ainda
   não testados
-- Teste com modelo de IA real: em progresso, rodando de forma isolada (em contêiner)
+- Falta: IA real também no processador (só testei na GPU até agora), e um
+  jeito de medir a energia da máquina inteira (não só da placa de vídeo)
 
 
