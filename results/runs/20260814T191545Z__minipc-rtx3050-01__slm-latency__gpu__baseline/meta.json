@@ -1,0 +1,43 @@
+{
+  "run_id": "20260814T191545Z__minipc-rtx3050-01__slm-latency__gpu__baseline",
+  "timestamp_utc": "2026-08-14T19:16:06.827578+00:00",
+  "repo_commit": "4c1ac8a",
+  "context": {
+    "device_id": "minipc-rtx3050-01",
+    "device_platform": "generic",
+    "board_model": null,
+    "location": "remoto",
+    "backend": "gpu",
+    "accelerator": "NVIDIA GeForce RTX 3050, 6144 MiB",
+    "accelerator_type": "gpu_discrete",
+    "scenario": "baseline",
+    "scenario_description": "Sem restricao, modo de energia maximo",
+    "runtime": "llama.cpp CUDA (container Docker)",
+    "model": "LFM2-350M",
+    "quantization": "Q4_K_M",
+    "workload": {
+      "prompt_set": "benchmarks/data/prompts_128.jsonl",
+      "n_prompts": 20,
+      "input_tokens": 128,
+      "output_tokens": 128,
+      "batch_size": 1
+    },
+    "power_mode": "MAXN",
+    "cooling": "ativa",
+    "ambient_temp_c": null,
+    "temp_start_c": 45.0,
+    "repetitions": 5,
+    "warmup_discarded": 2,
+    "seed": 42,
+    "command": "python workloads/llama_docker_workload.py --device cuda --model LiquidAI/LFM2-350M-GGUF:Q4_K_M --n-predict 128",
+    "env_overrides": {
+      "MODEL_PATH": "reference"
+    }
+  },
+  "methodology_ref": "docs/METODOLOGIA.md",
+  "host": {
+    "python": "3.12.3",
+    "kernel": "6.17.0-35-generic"
+  },
+  "notes": null
+}
