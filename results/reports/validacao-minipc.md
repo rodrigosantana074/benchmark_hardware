@@ -229,6 +229,11 @@ forma real em ambos os backends (a sintética nunca saiu de ~45°C).
 
 ## Pendências
 
+- Banda de RAM (`memory.bandwidth_gbps`, ver `docs/CATALOGO_HARDWARE.md`) —
+  script já pronto e testado, mas ainda não rodado no mini PC nem nos RPi.
+  Motivação: explicar *por que* `cpu` rendeu mais tokens/s que `gpu` no
+  LFM2 (inferência de LLM tende a ser limitada por banda de memória, não
+  cálculo bruto) — planejado pra amanhã, antes do Raspberry Pi.
 - Raspberry Pi 5 (Hailo e Coral) — pipeline ainda não testado neles.
 - Energia do sistema inteiro — só a GPU é medida hoje; falta sensor
   externo ou wattímetro.

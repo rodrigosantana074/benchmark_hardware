@@ -96,3 +96,7 @@ de ler texto solto da tela.
   testados
 - Falta: medir a energia da máquina inteira (só a placa de vídeo é medida
   hoje) e testar outros cenários (carga sustentada, restrição de memória)
+- Já preparei uma medição de velocidade de acesso à memória RAM (banda de
+  memória) — ajuda a explicar por que o processador rendeu mais tokens/s
+  que a placa de vídeo. Ainda não rodei, é o próximo passo antes dos
+  Raspberry Pi

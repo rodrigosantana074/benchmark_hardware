@@ -87,8 +87,46 @@ def cpu_info():
     return info
 
 
+def memory_bandwidth_gbps(size_mb=256, iterations=5):
+    """Banda de RAM aproximada (leitura+escrita), via memmove da libc.
+
+    Nao e pico teorico nem substitui STREAM/sysbench -- e uma medida
+    relativa, feita do mesmo jeito em qualquer device (sem apt/sudo),
+    pensada pra comparar bandwidth entre CPU/GPU/devices, nao pra bater
+    com numero de datasheet. Usa o menor tempo entre as repeticoes pra
+    reduzir ruido de scheduling do SO.
+    """
+    try:
+        import ctypes
+        import time
+
+        size = size_mb * 1024 * 1024
+        src = ctypes.create_string_buffer(size)
+        dst = ctypes.create_string_buffer(size)
+        ctypes.memset(src, 1, size)
+
+        best = None
+        for _ in range(iterations):
+            t0 = time.perf_counter()
+            ctypes.memmove(dst, src, size)
+            elapsed = time.perf_counter() - t0
+            if best is None or elapsed < best:
+                best = elapsed
+        if not best:
+            return None
+        return round((size / best) / 1e9, 2)
+    except Exception:
+        return None
+
+
 def memory_info():
-    info = {"total_mb": None, "swap_total_mb": None, "unified_with_gpu": False}
+    info = {
+        "total_mb": None,
+        "swap_total_mb": None,
+        "unified_with_gpu": False,
+        "bandwidth_gbps": None,
+        "bandwidth_method": "memmove (ver docs/CATALOGO_HARDWARE.md)",
+    }
     try:
         import psutil
 
@@ -99,6 +137,7 @@ def memory_info():
         m = re.search(r"MemTotal:\s+(\d+) kB", meminfo)
         if m:
             info["total_mb"] = round(int(m.group(1)) / 1024)
+    info["bandwidth_gbps"] = memory_bandwidth_gbps()
     return info
 
 
