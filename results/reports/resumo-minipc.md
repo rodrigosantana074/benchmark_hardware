@@ -54,8 +54,18 @@ A especificação que recebi originalmente apontava uma placa mais forte
 **Achado que não esperava:** pra esse modelo pequeno, o processador saiu
 mais rápido na média — mas bem menos consistente. Uma das 5 repetições foi
 bem mais lenta que as outras, coincidindo com o pico de temperatura da
-máquina. A placa de vídeo foi mais devagar na média, só que extremamente
-previsível entre as repetições.
+máquina:
+
+| Repetição | Velocidade (tokens/s) |
+|---|---|
+| 1 | 105.9 |
+| 2 | 105.8 |
+| 3 | 105.3 |
+| 4 | 102.5 |
+| 5 | **75.9** |
+
+A placa de vídeo foi mais devagar na média, só que extremamente previsível
+entre as repetições — todas as 5 saíram entre 88.24 e 88.28 tokens/s.
 
 Isso não quer dizer "processador é melhor que placa de vídeo" — quer dizer
 que cada um leva vantagem em critério diferente (pico de velocidade vs.
